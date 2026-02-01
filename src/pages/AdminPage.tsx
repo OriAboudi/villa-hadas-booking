@@ -374,10 +374,7 @@ export const AdminPage = () => {
                      p-4 sm:p-6 shadow-lg text-white col-span-2 lg:col-span-1"
           >
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-lg sm:rounded-xl 
-                            flex items-center justify-center">
-                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
+           
               <span className="text-xs sm:text-sm opacity-90">הכנסות</span>
             </div>
             <div className="text-2xl sm:text-3xl font-bold mb-1">
