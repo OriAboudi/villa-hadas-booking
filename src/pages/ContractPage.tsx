@@ -21,10 +21,10 @@ interface InputFieldProps {
   max?: number | string;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ 
-  label, 
-  name, 
-  type = 'text', 
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  type = 'text',
   required = false,
   icon: Icon,
   value,
@@ -36,7 +36,7 @@ const InputField: React.FC<InputFieldProps> = ({
   max
 }) => {
   const hasValue = value && String(value).length > 0;
-  
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -61,12 +61,12 @@ const InputField: React.FC<InputFieldProps> = ({
                      font-medium transition-all duration-200
                      focus:outline-none focus:ring-4 focus:ring-blue-500/20
                      dark:bg-slate-800 dark:text-white
-                     ${error 
-                       ? 'border-red-500 bg-red-50 dark:bg-red-900/10' 
-                       : hasValue
-                       ? 'border-green-500 bg-green-50 dark:bg-green-900/10'
-                       : 'border-slate-300 dark:border-slate-600 bg-white'
-                     }`}
+                     ${error
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/10'
+              : hasValue
+                ? 'border-green-500 bg-green-50 dark:bg-green-900/10'
+                : 'border-slate-300 dark:border-slate-600 bg-white'
+            }`}
         />
         {hasValue && !error && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
@@ -75,7 +75,7 @@ const InputField: React.FC<InputFieldProps> = ({
         )}
       </div>
       {error && (
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2"
@@ -93,7 +93,7 @@ export const ContractPage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const [formData, setFormData] = useState<Partial<BookingData>>({
     fullName: '',
     idNumber: '',
@@ -123,7 +123,7 @@ export const ContractPage = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.fullName || formData.fullName.length < 2) {
       newErrors.fullName = 'נא להזין שם מלא';
     }
@@ -145,16 +145,16 @@ export const ContractPage = () => {
     if (formData.checkIn && formData.checkOut && new Date(formData.checkOut) <= new Date(formData.checkIn)) {
       newErrors.checkOut = 'תאריך יציאה חייב להיות אחרי תאריך כניסה';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
 
 
- const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       const firstError = document.querySelector('.border-red-500');
       firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -162,7 +162,7 @@ export const ContractPage = () => {
     }
 
     setLoading(true);
-    
+
     try {
       // 1️⃣ הכן את הנתונים
       const bookingData: Omit<BookingData, 'id'> = {
@@ -193,13 +193,13 @@ export const ContractPage = () => {
         deposit: formatCurrency(formData.deposit || 0),
         balance: formatCurrency(balance),
       };
-      
+
       await sendBookingEmails(emailData);
       console.log('✅ Emails sent');
 
       // 4️⃣ הצג הצלחה
       setSuccess(true);
-      
+
       // 5️⃣ נקה טופס
       setTimeout(() => {
         setSuccess(false);
@@ -216,7 +216,7 @@ export const ContractPage = () => {
           status: 'pending',
         });
       }, 3000);
-      
+
     } catch (error) {
       console.error('❌ Error submitting booking:', error);
       alert('אירעה שגיאה בשליחת ההזמנה. נא לנסות שוב.');
@@ -227,7 +227,7 @@ export const ContractPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        
+
         {/* Header */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
@@ -250,7 +250,7 @@ export const ContractPage = () => {
           onSubmit={handleSubmit}
           className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 md:p-12 space-y-10"
         >
-          
+
           {/* Personal Details */}
           <section>
             <div className="flex items-center gap-3 mb-6">
@@ -261,45 +261,45 @@ export const ContractPage = () => {
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">פרטים אישיים</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <InputField 
-                label="שם מלא" 
+              <InputField
+                label="שם מלא"
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
                 error={errors.fullName}
-                required 
+                required
                 icon={User}
                 placeholder="שם פרטי ומשפחה"
               />
-              <InputField 
-                label="תעודת זהות" 
+              <InputField
+                label="תעודת זהות"
                 name="idNumber"
                 value={formData.idNumber}
                 onChange={handleChange}
                 error={errors.idNumber}
-                required 
+                required
                 maxLength={9}
                 placeholder="123456789"
               />
-              <InputField 
-                label="טלפון נייד" 
+              <InputField
+                label="טלפון נייד"
                 name="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
                 error={errors.phone}
-                required 
+                required
                 maxLength={10}
                 placeholder="0501234567"
               />
-              <InputField 
-                label="דוא״ל" 
+              <InputField
+                label="דוא״ל"
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
-                required 
+                required
                 placeholder="example@email.com"
               />
             </div>
@@ -315,24 +315,24 @@ export const ContractPage = () => {
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">תאריכי שהייה</h2>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
-              <InputField 
-                label="כניסה" 
+              <InputField
+                label="כניסה"
                 name="checkIn"
                 type="date"
                 value={formData.checkIn}
                 onChange={handleChange}
                 error={errors.checkIn}
-                required 
+                required
                 min={new Date().toISOString().split('T')[0]}
               />
-              <InputField 
-                label="יציאה" 
+              <InputField
+                label="יציאה"
                 name="checkOut"
                 type="date"
                 value={formData.checkOut}
                 onChange={handleChange}
                 error={errors.checkOut}
-                required 
+                required
                 min={formData.checkIn || new Date().toISOString().split('T')[0]}
               />
               <div className="space-y-2">
@@ -358,8 +358,8 @@ export const ContractPage = () => {
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">מספר אורחים</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <InputField 
-                label="מבוגרים" 
+              <InputField
+                label="מבוגרים"
                 name="adults"
                 type="number"
                 value={formData.adults}
@@ -367,10 +367,10 @@ export const ContractPage = () => {
                 error={errors.adults}
                 min={1}
                 max={12}
-                required 
+                required
               />
-              <InputField 
-                label="ילדים" 
+              <InputField
+                label="ילדים"
                 name="children"
                 type="number"
                 value={formData.children}
@@ -408,8 +408,8 @@ export const ContractPage = () => {
                   {formatCurrency(totalPrice)}
                 </span>
               </div>
-              
-              <InputField 
+
+              {/* <InputField 
                 label="מקדמה ששולמה" 
                 name="deposit"
                 type="number"
@@ -419,13 +419,13 @@ export const ContractPage = () => {
                 min={0}
                 placeholder="0"
               />
-              
-              <div className="flex justify-between items-center text-xl pt-4 border-t-2 border-slate-300 dark:border-slate-600">
-                <span className="font-bold text-slate-900 dark:text-white">יתרה לתשלום:</span>
+               */}
+              {/* <div className="flex justify-between items-center text-xl pt-4 border-t-2 border-slate-300 dark:border-slate-600">
+                <span className="font-bold text-slate-900 dark:text-white">לתשלום:</span>
                 <span className="font-bold text-orange-600 dark:text-orange-400">
                   {formatCurrency(balance)}
                 </span>
-              </div>
+              </div> */}
             </div>
           </section>
 
@@ -467,11 +467,11 @@ export const ContractPage = () => {
                 </li>
               </ul>
             </div>
-            
+
             <label className="flex items-center gap-3 mt-4 cursor-pointer group">
-              <input 
-                type="checkbox" 
-                required 
+              <input
+                type="checkbox"
+                required
                 className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600
                          text-blue-600 focus:ring-4 focus:ring-blue-500/20
                          cursor-pointer"
