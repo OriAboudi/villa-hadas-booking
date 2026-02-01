@@ -1,15 +1,36 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, MapPin, Waves, Utensils, Users, Phone, Mail,  Calendar, TrendingDown, Zap, CheckCircle, Shield } from 'lucide-react';
+import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FEATURES = [
+    {
+        icon: Waves,
+        title: 'בריכה פרטית מחוממת',
+        desc: 'בריכה יוקרתית לשימוש בלעדי – גם בחורף',
+        gradient: 'from-blue-500 to-cyan-400',
+    },
+    {
+        icon: Shield,
+        title: 'חצר קדמית ואחורית',
+        desc: 'מרחבים פתוחים עם נוף מדהים',
+        gradient: 'from-purple-500 to-pink-500',
+    },
 
-    { icon: Waves, title: 'בריכה מחוממת', desc: 'בריכה פרטית ומחוממת כל השנה', gradient: 'from-blue-500 to-cyan-400' },
-    { icon: Shield, title: 'פרטיות מלאה', desc: 'גינה סגורה ומבודדת לחלוטין', gradient: 'from-purple-500 to-pink-500' },
-    { icon: Utensils, title: 'מטבח מאובזר', desc: 'מטבח חדיש עם כל הציוד', gradient: 'from-orange-500 to-red-500' },
-    { icon: Users, title: 'עד 12 אורחים', desc: '4 חדרי שינה מרווחים', gradient: 'from-green-500 to-emerald-500' },
+    {
+        icon: Utensils,
+        title: 'מטבח מאובזר + גריל גז',
+        desc: 'מושלם לארוחות משפחתיות ועל האש',
+        gradient: 'from-orange-500 to-red-500',
+    },
+    {
+        icon: Users,
+        title: 'עד 12 אורחים',
+        desc: '5 חדרי שינה מרווחים, כולל ג׳קוזי בחדרים העליונים',
+        gradient: 'from-green-500 to-emerald-500',
+    },
 ];
+
 
 const HOT_DEALS = [
     {
@@ -61,14 +82,31 @@ const IMAGES = [
 ];
 
 const WHY_CHOOSE_US = [
-    { icon: CheckCircle, title: 'בריכה פרטית מחוממת', desc: 'נהנים כל השנה בכל מזג אוויר' },
-    { icon: CheckCircle, title: 'פרטיות מלאה', desc: 'גינה סגורה ללא שכנים מציצים' },
-    { icon: CheckCircle, title: 'צ׳ק-אין גמיש', desc: 'שעות כניסה ויציאה נוחות' },
-    { icon: CheckCircle, title: 'מאובזר ברמה גבוהה', desc: 'כל מה שצריך לחופשה מושלמת' },
+    { icon: CheckCircle, title: '15 דקות מהכינרת', desc: 'מיקום מושלם לחופשה ליד המים והטבע' },
+    { icon: CheckCircle, title: 'בריכה פרטית מחוממת', desc: 'שחייה מפנקת בכל עונות השנה' },
+    {
+        icon: CheckCircle,
+        title: 'מאובזר ברמה גבוהה',
+        desc: 'כולל ציוד משחקים לילדים לנוחות והנאה לכל המשפחה'
+    },
+    {
+        icon: CheckCircle,
+        title: 'אזור שקט עם בתי כנסת בקרבת מקום',
+        desc: 'מתאים למשפחות, קבוצות ונופשים מכל המגזרים',
+    },
 ];
+
 
 export const HomePage = () => {
     const [selectedImage, setSelectedImage] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSelectedImage((prev) => (prev + 1) % IMAGES.length);
+        }, 4000); // כל 4 שניות
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -85,7 +123,8 @@ export const HomePage = () => {
                             className="absolute inset-0 w-full h-full object-cover"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: selectedImage === idx ? 1 : 0 }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 1, ease: 'easeInOut' }}
+
                         />
                     ))}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent" />
@@ -161,9 +200,8 @@ export const HomePage = () => {
                         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto px-2">
                             {[
                                 { icon: '🏊', text: 'בריכה מחוממת' },
-                                { icon: '🌳', text: 'גינה פרטית' },
+                                { icon: '🎯', text: 'אזור משחקים' },
                                 { icon: '🛏️', text: '4 חדרי שינה' },
-
                                 { icon: '🍳', text: 'מטבח מאובזר' }
                             ].map((item) => (
                                 <motion.div
@@ -503,10 +541,10 @@ export const HomePage = () => {
                                           hover:scale-110 hover:rotate-6 transition-all duration-300">
                                 <Mail className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-lg" />
                             </div>
-                            <a href="mailto:info@vilat-hadas.co.il"
+                            <a href="mailto:vilathadass@gmail.com"
                                 className="text-base sm:text-lg font-semibold hover:text-primary-600 
                                         transition-colors text-slate-900 dark:text-white break-all">
-                                info@vilat-hadas.co.il
+                                vilathadass@gmail.com
                             </a>
                         </div>
                         <div className="flex flex-col items-center gap-3">
