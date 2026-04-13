@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield, LucideIcon } from 'lucide-react';
+import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getActiveDeals, getAllInvitations } from '../lib/firebase';
 import { Deal, Invitation } from '../types';
@@ -87,7 +87,7 @@ const FALLBACK_IMAGES = [
 ];
 
 // Icon mapping for deal icons
-const iconMap: Record<string, LucideIcon> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     Calendar,
     TrendingDown,
     Zap,

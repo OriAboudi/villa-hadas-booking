@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
-import { CheckCircle, LucideIcon } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Deal } from '../types';
+import type { ReactNode } from 'react';
 
 interface DealCardProps {
   deal: Deal;
   index: number;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 export const DealCard = ({ deal, index, icon: Icon }: DealCardProps) => {
