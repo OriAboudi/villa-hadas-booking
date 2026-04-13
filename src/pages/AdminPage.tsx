@@ -4,6 +4,9 @@ import { Lock, LogOut, Eye, EyeOff } from 'lucide-react';
 import { AdminTabs } from '../components/admin/AdminTabs';
 import { BookingsTab } from '../components/admin/BookingsTab';
 import { DealsTab } from '../components/admin/DealsTab';
+import { InvitationsTab } from '../components/admin/InvitationsTab';
+import { ImagesTab } from '../components/admin/ImagesTab';
+import { SettingsTab } from '../components/admin/SettingsTab';
 
 const ADMIN_PASSWORD = '1234';
 
@@ -13,7 +16,7 @@ export const AdminPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'bookings' | 'deals' | 'invitations' | 'images'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'deals' | 'invitations' | 'images' | 'settings'>('bookings');
 
   // Check authentication on mount
   useEffect(() => {
@@ -174,20 +177,9 @@ export const AdminPage = () => {
         >
           {activeTab === 'bookings' && <BookingsTab />}
           {activeTab === 'deals' && <DealsTab />}
-          {activeTab === 'invitations' && (
-            <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl">
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
-                📅 ניהול אירועים - בקרוב...
-              </p>
-            </div>
-          )}
-          {activeTab === 'images' && (
-            <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-2xl">
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
-                🖼️ ניהול תמונות - בקרוב...
-              </p>
-            </div>
-          )}
+          {activeTab === 'invitations' && <InvitationsTab />}
+          {activeTab === 'images' && <ImagesTab />}
+          {activeTab === 'settings' && <SettingsTab />}
         </motion.div>
       </div>
     </div>

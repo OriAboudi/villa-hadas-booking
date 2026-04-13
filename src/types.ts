@@ -75,3 +75,23 @@ export interface ImageAsset {
   uploadedAt: string;
   isActive: boolean;
 }
+
+export interface PageSettings {
+  id?: string;
+  // Hero Section
+  heroTitle: string;
+  heroSubtitle: string;
+  heroButtonText: string;
+  // Contact Info
+  contactEmail: string;
+  contactPhone: string;
+  // About Section
+  aboutTitle: string;
+  aboutDescription: string;
+  // Features
+  featuresTitle: string;
+  // General
+  siteTitle: string;
+  siteLogo: string;
+  updatedAt: string;
+}

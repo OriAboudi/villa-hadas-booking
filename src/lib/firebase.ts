@@ -10,7 +10,8 @@ import {
   where,
   doc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  setDoc
 } from 'firebase/firestore';
 import {
   getStorage,
@@ -19,7 +20,7 @@ import {
   getDownloadURL,
   deleteObject
 } from 'firebase/storage';
-import type { BookingData, Deal, Invitation, ImageAsset } from '../types';
+import type { BookingData, Deal, Invitation, ImageAsset, PageSettings } from '../types';
 
 // ⭐ הדבק כאן את הקונפיג מ-Firebase Console
 const firebaseConfig = {
@@ -285,36 +286,35 @@ export const deleteInvitation = async (id: string) => {
 
 // ============ IMAGE OPERATIONS ============
 
-// העלאת תמונה עם עדכוני התקדמות
+// העלאת תמונה כ-Base64 (bypass CORS issues)
 export const uploadImage = async (
   file: File,
   category: string,
   onProgress: (progress: number) => void
 ): Promise<string> => {
   try {
-    const timestamp = Date.now();
-    const fileName = `${category}/${timestamp}_${file.name}`;
-    const storageRef = ref(storage, fileName);
-
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
     return new Promise((resolve, reject) => {
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      const reader = new FileReader();
+
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = (event.loaded / event.total) * 100;
           onProgress(progress);
-        },
-        (error) => {
-          console.error('❌ Error uploading image:', error);
-          reject(error);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log('✅ Image uploaded:', fileName);
-          resolve(downloadURL);
         }
-      );
+      };
+
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        console.log('✅ Image converted to Base64');
+        resolve(base64String);
+      };
+
+      reader.onerror = () => {
+        console.error('❌ Error reading file');
+        reject(new Error('Failed to read file'));
+      };
+
+      reader.readAsDataURL(file);
     });
   } catch (error) {
     console.error('❌ Error in uploadImage:', error);
@@ -413,20 +413,86 @@ export const updateImage = async (id: string, image: Partial<ImageAsset>) => {
 };
 
 // מחיקת תמונה
-export const deleteImage = async (id: string, storagePath?: string) => {
+export const deleteImage = async (id: string) => {
   try {
-    // מחיקה מ-Firestore
+    // מחיקה מ-Firestore (Base64 stored inline)
     await deleteDoc(doc(db, 'images', id));
-
-    // מחיקה מ-Storage (אם יש נתיב)
-    if (storagePath) {
-      const imageRef = ref(storage, storagePath);
-      await deleteObject(imageRef);
-    }
-
     console.log('✅ Image deleted:', id);
   } catch (error) {
     console.error('❌ Error deleting image:', error);
+    throw error;
+  }
+};
+
+// ============ PAGE SETTINGS OPERATIONS ============
+
+// קבלת הגדרות העמוד
+export const getPageSettings = async (): Promise<PageSettings> => {
+  try {
+    const docRef = doc(db, 'settings', 'pageSettings');
+    const docSnap = await getDocs(collection(db, 'settings'));
+
+    let settings: PageSettings | null = null;
+    docSnap.forEach((doc) => {
+      if (doc.id === 'pageSettings') {
+        const data = doc.data();
+        settings = {
+          id: doc.id,
+          heroTitle: data.heroTitle || 'Villa Hadas',
+          heroSubtitle: data.heroSubtitle || 'עלייה נדירה למנוחה מושלמת',
+          heroButtonText: data.heroButtonText || 'הזמן עכשיו',
+          contactEmail: data.contactEmail || 'contact@villahadas.com',
+          contactPhone: data.contactPhone || '+972-2-123-4567',
+          aboutTitle: data.aboutTitle || 'אודות וילה הדס',
+          aboutDescription: data.aboutDescription || 'ביוטה אירוח יוקרתית בלב הטבע',
+          featuresTitle: data.featuresTitle || 'המשכנעות שלנו',
+          siteTitle: data.siteTitle || 'Villa Hadas',
+          siteLogo: data.siteLogo || '',
+          updatedAt: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+        };
+      }
+    });
+
+    if (!settings) {
+      // Create default settings if they don't exist
+      settings = {
+        heroTitle: 'Villa Hadas',
+        heroSubtitle: 'עלייה נדירה למנוחה מושלמת',
+        heroButtonText: 'הזמן עכשיו',
+        contactEmail: 'contact@villahadas.com',
+        contactPhone: '+972-2-123-4567',
+        aboutTitle: 'אודות וילה הדס',
+        aboutDescription: 'ביוטה אירוח יוקרתית בלב הטבע',
+        featuresTitle: 'המשכנעות שלנו',
+        siteTitle: 'Villa Hadas',
+        siteLogo: '',
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    console.log('✅ Loaded page settings');
+    return settings;
+  } catch (error) {
+    console.error('❌ Error loading page settings:', error);
+    throw error;
+  }
+};
+
+// שמירת הגדרות העמוד
+export const savePageSettings = async (settings: Omit<PageSettings, 'id'>) => {
+  try {
+    const docRef = doc(db, 'settings', 'pageSettings');
+    await setDoc(
+      docRef,
+      {
+        ...settings,
+        updatedAt: Timestamp.now(),
+      },
+      { merge: true }
+    );
+    console.log('✅ Page settings saved');
+  } catch (error) {
+    console.error('❌ Error saving page settings:', error);
     throw error;
   }
 };

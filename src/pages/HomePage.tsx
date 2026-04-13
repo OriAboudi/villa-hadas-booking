@@ -478,7 +478,7 @@ export const HomePage = () => {
                         גלריית תמונות
                     </h2>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {IMAGES.map((img, idx) => (
+                        {FALLBACK_IMAGES.map((img, idx) => (
                             <motion.div
                                 key={img}
                                 initial={{ opacity: 0, scale: 0.9 }}

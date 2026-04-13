@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Calendar, Tag, CalendarDays, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Tag, CalendarDays, Image as ImageIcon, Settings } from 'lucide-react';
 
 interface AdminTabsProps {
-  activeTab: 'bookings' | 'deals' | 'invitations' | 'images';
-  onTabChange: (tab: 'bookings' | 'deals' | 'invitations' | 'images') => void;
+  activeTab: 'bookings' | 'deals' | 'invitations' | 'images' | 'settings';
+  onTabChange: (tab: 'bookings' | 'deals' | 'invitations' | 'images' | 'settings') => void;
 }
 
 export const AdminTabs = ({ activeTab, onTabChange }: AdminTabsProps) => {
@@ -12,6 +12,7 @@ export const AdminTabs = ({ activeTab, onTabChange }: AdminTabsProps) => {
     { id: 'deals' as const, label: 'מבצעים', icon: Tag },
     { id: 'invitations' as const, label: 'אירועים', icon: CalendarDays },
     { id: 'images' as const, label: 'תמונות', icon: ImageIcon },
+    { id: 'settings' as const, label: 'הגדרות', icon: Settings },
   ];
 
   return (
