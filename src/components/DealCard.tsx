@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { Deal } from '../types';
-import type { ReactNode } from 'react';
 
 interface DealCardProps {
   deal: Deal;
