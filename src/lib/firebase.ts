@@ -1,6 +1,25 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
-import type { BookingData } from '../types';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  Timestamp,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'firebase/firestore';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
+} from 'firebase/storage';
+import type { BookingData, Deal, Invitation, ImageAsset } from '../types';
 
 // ⭐ הדבק כאן את הקונפיג מ-Firebase Console
 const firebaseConfig = {
@@ -15,6 +34,7 @@ const firebaseConfig = {
 // אתחול Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // שמירת הזמנה חדשה
 export const saveBooking = async (bookingData: Omit<BookingData, 'id'>) => {
@@ -72,4 +92,343 @@ export const getAllBookings = async (): Promise<BookingData[]> => {
   }
 };
 
-export { db };
+// ============ DEALS OPERATIONS ============
+
+// קבלת כל המבצעים הפעילים
+export const getActiveDeals = async (): Promise<Deal[]> => {
+  try {
+    const q = query(
+      collection(db, 'deals'),
+      where('isActive', '==', true),
+      orderBy('displayOrder', 'asc')
+    );
+    const querySnapshot = await getDocs(q);
+    const deals: Deal[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      deals.push({
+        id: doc.id,
+        title: data.title,
+        description: data.description,
+        originalPrice: data.originalPrice,
+        salePrice: data.salePrice,
+        discount: data.discount,
+        badge: data.badge,
+        gradient: data.gradient,
+        iconName: data.iconName,
+        features: data.features,
+        isActive: data.isActive,
+        displayOrder: data.displayOrder,
+        createdAt: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+      });
+    });
+
+    console.log('✅ Loaded', deals.length, 'active deals');
+    return deals;
+  } catch (error) {
+    console.error('❌ Error loading active deals:', error);
+    throw error;
+  }
+};
+
+// קבלת כל המבצעים (כולל לא פעילים)
+export const getAllDeals = async (): Promise<Deal[]> => {
+  try {
+    const q = query(collection(db, 'deals'), orderBy('displayOrder', 'asc'));
+    const querySnapshot = await getDocs(q);
+    const deals: Deal[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      deals.push({
+        id: doc.id,
+        title: data.title,
+        description: data.description,
+        originalPrice: data.originalPrice,
+        salePrice: data.salePrice,
+        discount: data.discount,
+        badge: data.badge,
+        gradient: data.gradient,
+        iconName: data.iconName,
+        features: data.features,
+        isActive: data.isActive,
+        displayOrder: data.displayOrder,
+        createdAt: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+      });
+    });
+
+    console.log('✅ Loaded', deals.length, 'deals');
+    return deals;
+  } catch (error) {
+    console.error('❌ Error loading deals:', error);
+    throw error;
+  }
+};
+
+// שמירת מבצע חדש
+export const saveDeal = async (deal: Omit<Deal, 'id'>) => {
+  try {
+    const docRef = await addDoc(collection(db, 'deals'), {
+      ...deal,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+    console.log('✅ Deal saved:', docRef.id);
+    return { id: docRef.id, ...deal };
+  } catch (error) {
+    console.error('❌ Error saving deal:', error);
+    throw error;
+  }
+};
+
+// עדכון מבצע
+export const updateDeal = async (id: string, deal: Partial<Deal>) => {
+  try {
+    const docRef = doc(db, 'deals', id);
+    await updateDoc(docRef, { ...deal, updatedAt: Timestamp.now() });
+    console.log('✅ Deal updated:', id);
+  } catch (error) {
+    console.error('❌ Error updating deal:', error);
+    throw error;
+  }
+};
+
+// מחיקת מבצע
+export const deleteDeal = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'deals', id));
+    console.log('✅ Deal deleted:', id);
+  } catch (error) {
+    console.error('❌ Error deleting deal:', error);
+    throw error;
+  }
+};
+
+// ============ INVITATIONS OPERATIONS ============
+
+// קבלת כל ההזמנות/אירועים
+export const getAllInvitations = async (): Promise<Invitation[]> => {
+  try {
+    const q = query(collection(db, 'invitations'), orderBy('eventDate', 'asc'));
+    const querySnapshot = await getDocs(q);
+    const invitations: Invitation[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      invitations.push({
+        id: doc.id,
+        guestName: data.guestName,
+        eventType: data.eventType,
+        eventDate: data.eventDate,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        numberOfGuests: data.numberOfGuests,
+        phoneNumber: data.phoneNumber,
+        email: data.email,
+        specialRequests: data.specialRequests,
+        status: data.status,
+        color: data.color,
+        createdAt: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+      });
+    });
+
+    console.log('✅ Loaded', invitations.length, 'invitations');
+    return invitations;
+  } catch (error) {
+    console.error('❌ Error loading invitations:', error);
+    throw error;
+  }
+};
+
+// שמירת הזמנה חדשה
+export const saveInvitation = async (invitation: Omit<Invitation, 'id'>) => {
+  try {
+    const docRef = await addDoc(collection(db, 'invitations'), {
+      ...invitation,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    });
+    console.log('✅ Invitation saved:', docRef.id);
+    return { id: docRef.id, ...invitation };
+  } catch (error) {
+    console.error('❌ Error saving invitation:', error);
+    throw error;
+  }
+};
+
+// עדכון הזמנה
+export const updateInvitation = async (id: string, invitation: Partial<Invitation>) => {
+  try {
+    const docRef = doc(db, 'invitations', id);
+    await updateDoc(docRef, { ...invitation, updatedAt: Timestamp.now() });
+    console.log('✅ Invitation updated:', id);
+  } catch (error) {
+    console.error('❌ Error updating invitation:', error);
+    throw error;
+  }
+};
+
+// מחיקת הזמנה
+export const deleteInvitation = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'invitations', id));
+    console.log('✅ Invitation deleted:', id);
+  } catch (error) {
+    console.error('❌ Error deleting invitation:', error);
+    throw error;
+  }
+};
+
+// ============ IMAGE OPERATIONS ============
+
+// העלאת תמונה עם עדכוני התקדמות
+export const uploadImage = async (
+  file: File,
+  category: string,
+  onProgress: (progress: number) => void
+): Promise<string> => {
+  try {
+    const timestamp = Date.now();
+    const fileName = `${category}/${timestamp}_${file.name}`;
+    const storageRef = ref(storage, fileName);
+
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress(progress);
+        },
+        (error) => {
+          console.error('❌ Error uploading image:', error);
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log('✅ Image uploaded:', fileName);
+          resolve(downloadURL);
+        }
+      );
+    });
+  } catch (error) {
+    console.error('❌ Error in uploadImage:', error);
+    throw error;
+  }
+};
+
+// קבלת תמונות לפי קטגוריה
+export const getImagesByCategory = async (category: string): Promise<ImageAsset[]> => {
+  try {
+    const q = query(
+      collection(db, 'images'),
+      where('category', '==', category),
+      where('isActive', '==', true),
+      orderBy('displayOrder', 'asc')
+    );
+    const querySnapshot = await getDocs(q);
+    const images: ImageAsset[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      images.push({
+        id: doc.id,
+        fileName: data.fileName,
+        storageUrl: data.storageUrl,
+        category: data.category,
+        displayOrder: data.displayOrder,
+        altText: data.altText,
+        uploadedAt: data.uploadedAt?.toDate().toISOString() || new Date().toISOString(),
+        isActive: data.isActive,
+      });
+    });
+
+    console.log('✅ Loaded', images.length, `images for category: ${category}`);
+    return images;
+  } catch (error) {
+    console.error('❌ Error loading images:', error);
+    throw error;
+  }
+};
+
+// קבלת כל התמונות (כולל לא פעילות)
+export const getAllImages = async (): Promise<ImageAsset[]> => {
+  try {
+    const q = query(collection(db, 'images'), orderBy('displayOrder', 'asc'));
+    const querySnapshot = await getDocs(q);
+    const images: ImageAsset[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      images.push({
+        id: doc.id,
+        fileName: data.fileName,
+        storageUrl: data.storageUrl,
+        category: data.category,
+        displayOrder: data.displayOrder,
+        altText: data.altText,
+        uploadedAt: data.uploadedAt?.toDate().toISOString() || new Date().toISOString(),
+        isActive: data.isActive,
+      });
+    });
+
+    console.log('✅ Loaded', images.length, 'images');
+    return images;
+  } catch (error) {
+    console.error('❌ Error loading images:', error);
+    throw error;
+  }
+};
+
+// שמירת מטא-דטה של תמונה
+export const saveImageMetadata = async (image: Omit<ImageAsset, 'id'>): Promise<ImageAsset> => {
+  try {
+    const docRef = await addDoc(collection(db, 'images'), {
+      ...image,
+      uploadedAt: Timestamp.now(),
+    });
+    console.log('✅ Image metadata saved:', docRef.id);
+    return { id: docRef.id, ...image };
+  } catch (error) {
+    console.error('❌ Error saving image metadata:', error);
+    throw error;
+  }
+};
+
+// עדכון תמונה
+export const updateImage = async (id: string, image: Partial<ImageAsset>) => {
+  try {
+    const docRef = doc(db, 'images', id);
+    await updateDoc(docRef, image);
+    console.log('✅ Image updated:', id);
+  } catch (error) {
+    console.error('❌ Error updating image:', error);
+    throw error;
+  }
+};
+
+// מחיקת תמונה
+export const deleteImage = async (id: string, storagePath?: string) => {
+  try {
+    // מחיקה מ-Firestore
+    await deleteDoc(doc(db, 'images', id));
+
+    // מחיקה מ-Storage (אם יש נתיב)
+    if (storagePath) {
+      const imageRef = ref(storage, storagePath);
+      await deleteObject(imageRef);
+    }
+
+    console.log('✅ Image deleted:', id);
+  } catch (error) {
+    console.error('❌ Error deleting image:', error);
+    throw error;
+  }
+};
+
+export { db, storage };

@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield } from 'lucide-react';
+import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield, LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getActiveDeals, getAllInvitations } from '../lib/firebase';
+import { Deal, Invitation } from '../types';
+import { DealCard } from '../components/DealCard';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { SkeletonCard } from '../components/SkeletonCard';
 
 const FEATURES = [
     {
@@ -74,11 +79,70 @@ const REVIEWS = [
     { name: 'מיכל אברהם', rating: 5, text: 'המקום הכי טוב לחופשה משפחתית. הילדים נהנו מהבריכה והגינה.', date: '2024-01-05', avatar: '👩' },
 ];
 
-const IMAGES = [
+const FALLBACK_IMAGES = [
     '/images/hero-1.jpg',
     '/images/hero-2.jpg',
     '/images/hero-3.jpg',
     '/images/hero-4.jpg',
+];
+
+// Icon mapping for deal icons
+const iconMap: Record<string, LucideIcon> = {
+    Calendar,
+    TrendingDown,
+    Zap,
+    Star,
+    Shield,
+    Users,
+};
+
+// Fallback deals for initial setup
+const FALLBACK_DEALS: Deal[] = [
+    {
+        title: 'מבצע סופ"ש',
+        originalPrice: 3500,
+        salePrice: 2800,
+        discount: '20%',
+        description: 'שישי-שבת (2 לילות)',
+        badge: 'הכי פופולרי',
+        gradient: 'from-rose-500 to-pink-600',
+        iconName: 'Calendar',
+        features: ['צ\'ק אין מוקדם', 'ארוחת בוקר', 'ניקיון חינם'],
+        isActive: true,
+        displayOrder: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        title: 'חבילת אמצע שבוע',
+        originalPrice: 2000,
+        salePrice: 1500,
+        discount: '25%',
+        description: 'ראשון-רביעי (4 לילות)',
+        badge: 'חיסכון מקסימלי',
+        gradient: 'from-amber-500 to-orange-600',
+        iconName: 'TrendingDown',
+        features: ['גמישות בשעות', 'מחיר מיוחד', 'שדרוג חדר'],
+        isActive: true,
+        displayOrder: 2,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
+    {
+        title: 'דיל בזק',
+        originalPrice: 1200,
+        salePrice: 999,
+        discount: '17%',
+        description: 'לילה אחד (ימים נבחרים)',
+        badge: 'מוגבל!',
+        gradient: 'from-violet-500 to-purple-600',
+        iconName: 'Zap',
+        features: ['צ\'ק אאוט מאוחר', 'ברוכים הבאים', 'WiFi מהיר'],
+        isActive: true,
+        displayOrder: 3,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    },
 ];
 
 const WHY_CHOOSE_US = [
@@ -99,10 +163,38 @@ const WHY_CHOOSE_US = [
 
 export const HomePage = () => {
     const [selectedImage, setSelectedImage] = useState(0);
+    const [deals, setDeals] = useState<Deal[]>(FALLBACK_DEALS);
+    const [invitations, setInvitations] = useState<Invitation[]>([]);
+    const [loading, setLoading] = useState(true);
 
+    // Load deals and invitations from Firebase
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                setLoading(true);
+                const [dealsData, invitationsData] = await Promise.all([
+                    getActiveDeals(),
+                    getAllInvitations(),
+                ]);
+                if (dealsData.length > 0) {
+                    setDeals(dealsData);
+                }
+                setInvitations(invitationsData);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Keep fallback deals if Firebase fails
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, []);
+
+    // Image carousel
     useEffect(() => {
         const interval = setInterval(() => {
-            setSelectedImage((prev) => (prev + 1) % IMAGES.length);
+            setSelectedImage((prev) => (prev + 1) % FALLBACK_IMAGES.length);
         }, 4000); // כל 4 שניות
 
         return () => clearInterval(interval);
@@ -115,7 +207,7 @@ export const HomePage = () => {
             <section className="relative h-[85vh] sm:h-[75vh] md:h-[70vh] min-h-[600px] sm:min-h-[500px] overflow-hidden">
                 {/* Background Images */}
                 <div className="absolute inset-0">
-                    {IMAGES.map((img, idx) => (
+                    {FALLBACK_IMAGES.map((img, idx) => (
                         <motion.img
                             key={img}
                             src={img}
@@ -222,9 +314,9 @@ export const HomePage = () => {
                     </motion.div>
 
                     {/* Image Dots */}
-                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 
+                    <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2
                                   flex gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full">
-                        {IMAGES.map((img, idx) => (
+                        {FALLBACK_IMAGES.map((img, idx) => (
                             <button
                                 key={img}
                                 onClick={() => setSelectedImage(idx)}
@@ -261,90 +353,30 @@ export const HomePage = () => {
                         </p>
                     </motion.div>
 
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-                        {HOT_DEALS.map((deal, idx) => (
-                            <motion.div
-                                key={deal.title}
-                                initial={{ y: 30, opacity: 0 }}
-                                whileInView={{ y: 0, opacity: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="relative group"
-                            >
-                                {/* Badge */}
-                                <div className="absolute -top-3 -right-3 z-10">
-                                    <div className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r ${deal.gradient} 
-                                                  text-white rounded-full shadow-xl text-xs sm:text-sm font-bold
-                                                  animate-pulse`}>
-                                        {deal.badge}
-                                    </div>
+                    {loading ? (
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...Array(3)].map((_, i) => (
+                                <SkeletonCard key={i} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                            {deals.length > 0 ? (
+                                deals.map((deal, idx) => (
+                                    <DealCard
+                                        key={deal.id || idx}
+                                        deal={deal}
+                                        index={idx}
+                                        icon={iconMap[deal.iconName] || Calendar}
+                                    />
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-8">
+                                    <p className="text-slate-600 dark:text-slate-400">אין מבצעים זמינים כרגע</p>
                                 </div>
-
-                                {/* Card */}
-                                <div className="bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl 
-                                              shadow-xl hover:shadow-2xl 
-                                              border-2 border-slate-200 dark:border-slate-700
-                                              overflow-hidden transition-all duration-300 
-                                              hover:-translate-y-2 h-full">
-
-                                    {/* Header with gradient */}
-                                    <div className={`bg-gradient-to-r ${deal.gradient} p-4 sm:p-6 text-white`}>
-                                        <div className="flex items-start justify-between mb-3 sm:mb-4">
-                                            <div>
-                                                <h3 className="text-xl sm:text-2xl font-bold mb-1">
-                                                    {deal.title}
-                                                </h3>
-                                                <p className="text-white/90 text-xs sm:text-sm">
-                                                    {deal.description}
-                                                </p>
-                                            </div>
-                                            <deal.icon className="w-6 h-6 sm:w-8 sm:h-8" />
-                                        </div>
-
-                                        {/* Price */}
-                                        <div className="flex items-end gap-2 sm:gap-3">
-                                            <div>
-                                                <div className="text-xs sm:text-sm text-white/80 line-through">
-                                                    {deal.originalPrice}
-                                                </div>
-                                                <div className="text-3xl sm:text-4xl md:text-5xl font-black">
-                                                    {deal.salePrice}
-                                                </div>
-                                            </div>
-                                            <div className="bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-lg mb-1 sm:mb-2">
-                                                <span className="text-lg sm:text-xl font-bold">-{deal.discount}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Features */}
-                                    <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
-                                        {deal.features.map((feature) => (
-                                            <div key={feature} className="flex items-center gap-2 sm:gap-3">
-                                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                                                <span className="text-slate-700 dark:text-slate-300 text-sm sm:text-base">
-                                                    {feature}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* CTA Button */}
-                                    <div className="p-4 sm:p-6 pt-0">
-                                        <Link
-                                            to="/contract"
-                                            className={`w-full block text-center px-4 sm:px-6 py-3 sm:py-4 
-                                                      bg-gradient-to-r ${deal.gradient} 
-                                                      text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl
-                                                      hover:scale-105 transition-all duration-300 shadow-lg`}
-                                        >
-                                            הזמן את המבצע
-                                        </Link>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Limited Time Banner */}
                     <motion.div
