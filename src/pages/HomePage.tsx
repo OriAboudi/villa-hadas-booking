@@ -189,7 +189,7 @@ export const HomePage = () => {
                             />
                         );
                     })}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent" />
                 </div>
 
                 {/* Hero Content */}
@@ -229,15 +229,15 @@ export const HomePage = () => {
                         </p>
 
                         {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 pt-6 sm:pt-8">
                             <Link
                                 to="/contract"
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                                         px-8 sm:px-14 md:px-20 py-4 sm:py-6
-                                         bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600
+                                         px-8 sm:px-16 md:px-24 py-4 sm:py-6
+                                         bg-green-500 hover:bg-green-600
                                          text-white font-bold text-base sm:text-lg md:text-xl
-                                         rounded-full shadow-2xl
-                                         hover:scale-110 hover:shadow-blue-500/70
+                                         rounded-full shadow-xl
+                                         hover:shadow-2xl hover:scale-105
                                          transition-all duration-300 active:scale-95"
                             >
                                 <Calendar className="w-5 h-5" />
@@ -246,11 +246,11 @@ export const HomePage = () => {
                             <a
                                 href="tel:0503313193"
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                                         px-8 sm:px-14 md:px-20 py-4 sm:py-6
-                                         bg-white/20 backdrop-blur-md text-white
-                                         font-bold text-base sm:text-lg md:text-xl
-                                         rounded-full border-2 border-white/50
-                                         hover:bg-white/30 hover:scale-110 hover:border-white/80
+                                         px-8 sm:px-16 md:px-24 py-4 sm:py-6
+                                         bg-white dark:bg-slate-800 text-green-600 dark:text-green-400
+                                         font-bold text-base sm:text-lg md:text-xl border-2 border-green-500
+                                         rounded-full shadow-xl
+                                         hover:shadow-2xl hover:scale-105
                                          transition-all duration-300 active:scale-95"
                             >
                                 <Phone className="w-5 h-5" />
@@ -309,12 +309,12 @@ export const HomePage = () => {
                         viewport={{ once: true }}
                         className="text-center mb-8 sm:mb-12"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 
-                                      bg-gradient-to-r from-red-500 to-orange-500 
-                                      text-white rounded-full mb-4 text-sm sm:text-base font-bold">
+                        <div className="inline-flex items-center gap-2 px-5 sm:px-7 py-2.5
+                                      bg-gradient-to-r from-red-500 to-orange-500
+                                      text-white rounded-full mb-4 text-sm sm:text-base font-bold shadow-lg">
                             🔥 מבצעים חמים
                         </div>
-                        <h2 className="text-1xl sm:text-4xl md:text-4xl  font-bold
+                        <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold
                                      text-slate-900 dark:text-white mb-3 sm:mb-4">
                             חסכו עד 25% עכשיו!
                         </h2>
@@ -355,9 +355,9 @@ export const HomePage = () => {
                         viewport={{ once: true }}
                         className="mt-8 sm:mt-12 text-center"
                     >
-                        <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-8 py-3 sm:py-4 
-                                      bg-gradient-to-r from-yellow-400 to-amber-500 
-                                      text-slate-900 rounded-full shadow-2xl text-sm sm:text-base font-bold">
+                        <div className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-4
+                                      bg-green-500
+                                      text-white rounded-full shadow-lg text-sm sm:text-base font-bold">
                             <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>⏰ המבצעים תקפים עד סוף החודש בלבד!</span>
                         </div>
@@ -377,9 +377,15 @@ export const HomePage = () => {
                     >
                         למה לבחור בנו?
                     </motion.h2>
-                    <p className="text-center text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-12 sm:mb-16">
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="text-center text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-12 sm:mb-16 max-w-2xl mx-auto"
+                    >
                         חוויית אירוח יוקרתית עם שירות אישי ומקצועי
-                    </p>
+                    </motion.p>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                         {WHY_CHOOSE_US.map((item, idx) => (
                             <motion.div
@@ -388,23 +394,18 @@ export const HomePage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.15 }}
-                                className="group bg-white dark:bg-slate-700/50 rounded-2xl p-6 sm:p-8
-                                         shadow-lg hover:shadow-2xl transition-all duration-300
-                                         hover:-translate-y-2 border border-slate-100 dark:border-slate-600
-                                         hover:border-blue-300 dark:hover:border-blue-500"
+                                className="group text-center"
                             >
-                                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6
-                                              bg-gradient-to-br from-green-500 to-emerald-500
-                                              rounded-2xl flex items-center justify-center shadow-lg
-                                              group-hover:scale-110 group-hover:shadow-green-500/50
-                                              transition-all duration-300">
-                                    <item.icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6
+                                              rounded-full flex items-center justify-center shadow-lg
+                                              group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 bg-gradient-to-br from-blue-500 to-cyan-500">
+                                    <item.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                                 </div>
                                 <h3 className="font-bold text-base sm:text-lg mb-2 sm:mb-3
-                                             text-slate-900 dark:text-white text-center">
+                                             text-slate-900 dark:text-white">
                                     {item.title}
                                 </h3>
-                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 text-center leading-relaxed">
+                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                     {item.desc}
                                 </p>
                             </motion.div>
@@ -438,25 +439,24 @@ export const HomePage = () => {
                                 whileInView={{ y: 0, opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="group relative bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl
+                                className="group relative bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl
                                          shadow-lg hover:shadow-2xl transition-all duration-300
-                                         hover:-translate-y-3 border border-slate-100 dark:border-slate-700
-                                         hover:border-blue-300 dark:hover:border-blue-500
+                                         hover:-translate-y-3 hover:scale-105 border-0
                                          overflow-hidden"
                             >
-                                {/* Gradient accent */}
-                                <div className={`absolute -top-12 -right-12 w-24 h-24 bg-gradient-to-br ${feature.gradient}
-                                              opacity-5 group-hover:opacity-10 transition-opacity duration-300 rounded-full`}></div>
+                                {/* Gradient accent circle */}
+                                <div className={`absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br ${feature.gradient}
+                                              opacity-10 group-hover:opacity-20 transition-opacity duration-300 rounded-full`}></div>
 
-                                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient}
-                                              rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg
+                                <div className={`w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${feature.gradient}
+                                              rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg
                                               group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300 relative z-10`}>
                                     <feature.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-lg" />
                                 </div>
                                 <h3 className="text-lg sm:text-xl font-bold mb-3 text-slate-900 dark:text-white relative z-10">
                                     {feature.title}
                                 </h3>
-                                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
+                                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed relative z-10">
                                     {feature.desc}
                                 </p>
                             </motion.div>
@@ -466,7 +466,7 @@ export const HomePage = () => {
             </section>
 
             {/* Gallery */}
-            <section className="py-12 sm:py-16 md:py-20 px-4">
+            <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-b from-white to-blue-50 dark:from-slate-800 dark:to-slate-900">
                 <div className="max-w-7xl mx-auto">
                     <h2 className="text-3xl sm:text-4xl font-display font-bold text-center
                                  mb-8 sm:mb-12 text-slate-900 dark:text-white">
@@ -501,7 +501,7 @@ export const HomePage = () => {
             </section>
 
             {/* Reviews */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-b from-white to-blue-50 dark:from-slate-800 dark:to-slate-900">
+            <section className="py-12 sm:py-16 md:py-20 px-4">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -525,32 +525,32 @@ export const HomePage = () => {
                                 whileInView={{ y: 0, opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="group relative bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl
-                                         shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2
-                                         border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500"
+                                className="group relative bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl
+                                         shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-105
+                                         border-0"
                             >
-                                {/* Quote mark */}
-                                <div className="absolute top-4 right-4 text-5xl text-blue-200 dark:text-blue-900/30 font-serif">"</div>
+                                {/* Gold accent */}
+                                <div className="absolute top-0 right-0 text-4xl text-amber-300/20 font-serif">"</div>
 
                                 <div className="flex items-center gap-1 mb-4 sm:mb-6 relative z-10">
                                     {[...Array(review.rating)].map((_, i) => (
-                                        <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
+                                        <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400 text-amber-400" />
                                     ))}
                                 </div>
-                                <p className="text-slate-700 dark:text-slate-300 mb-6 leading-relaxed text-sm sm:text-base relative z-10">
+                                <p className="text-slate-800 dark:text-slate-200 mb-6 leading-relaxed text-sm sm:text-base relative z-10">
                                     {review.text}
                                 </p>
                                 <div className="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-purple-500
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-amber-400 to-orange-500
                                                   rounded-full flex items-center justify-center text-xl sm:text-2xl
-                                                  shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                                  shadow-lg group-hover:scale-125 transition-all duration-300">
                                         {review.avatar}
                                     </div>
                                     <div className="flex-1">
                                         <div className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
                                             {review.name}
                                         </div>
-                                        <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                                        <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                                             {new Date(review.date).toLocaleDateString('he-IL')}
                                         </div>
                                     </div>
@@ -592,18 +592,17 @@ export const HomePage = () => {
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
                                 className="group flex flex-col items-center gap-4 p-6 sm:p-8
-                                         bg-gradient-to-br from-slate-50 to-white dark:from-slate-700/50 dark:to-slate-800
-                                         rounded-2xl border border-slate-100 dark:border-slate-700
-                                         hover:border-blue-300 dark:hover:border-blue-500
-                                         hover:shadow-lg transition-all duration-300 hover:-translate-y-2"
+                                         bg-slate-50 dark:bg-slate-700
+                                         rounded-3xl border-0
+                                         hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-105 shadow-lg"
                             >
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-purple-600
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600
                                               rounded-full flex items-center justify-center shadow-lg
-                                              group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300">
+                                              group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
                                     <item.Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-lg" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-1">
                                         {item.label}
                                     </p>
                                     <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
@@ -637,20 +636,20 @@ export const HomePage = () => {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link
                                 to="/contract"
-                                className="inline-flex items-center justify-center gap-3 px-10 sm:px-16 md:px-20 py-5 sm:py-6 md:py-7
-                                         bg-white text-blue-600 font-bold text-base sm:text-lg md:text-xl
-                                         rounded-full shadow-2xl hover:scale-110 hover:shadow-white/50
+                                className="inline-flex items-center justify-center gap-3 px-10 sm:px-18 md:px-24 py-4 sm:py-6 md:py-7
+                                         bg-white text-green-600 font-bold text-base sm:text-lg md:text-xl
+                                         rounded-full shadow-xl hover:shadow-2xl hover:scale-110 hover:bg-gray-50
                                          transition-all duration-300 active:scale-95"
                             >
                                 <Calendar className="w-6 h-6" />
-                                הזמן עכשיו
+                                שמור מקום
                             </Link>
                             <a
                                 href="tel:0503313193"
-                                className="inline-flex items-center justify-center gap-3 px-10 sm:px-16 md:px-20 py-5 sm:py-6 md:py-7
-                                         bg-white/20 backdrop-blur-sm text-white font-bold text-base sm:text-lg md:text-xl
-                                         rounded-full border-2 border-white/50 hover:bg-white/30 hover:border-white
-                                         hover:scale-110 transition-all duration-300 active:scale-95"
+                                className="inline-flex items-center justify-center gap-3 px-10 sm:px-18 md:px-24 py-4 sm:py-6 md:py-7
+                                         bg-white/20 backdrop-blur text-white font-bold text-base sm:text-lg md:text-xl border-2 border-white
+                                         rounded-full shadow-xl hover:shadow-2xl hover:scale-110 hover:bg-white/30
+                                         transition-all duration-300 active:scale-95"
                             >
                                 <Phone className="w-6 h-6" />
                                 התקשר
@@ -661,9 +660,9 @@ export const HomePage = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-900 text-white py-6 sm:py-8 px-4">
+            <footer className="bg-gradient-to-r from-slate-800 via-slate-900 to-black text-white py-8 sm:py-12 px-4">
                 <div className="max-w-7xl mx-auto text-center">
-                    <p className="text-slate-400 text-sm sm:text-base">
+                    <p className="text-sm sm:text-base text-gray-300">
                         © 2025 וילת הדס. כל הזכויות שמורות.
                     </p>
                 </div>

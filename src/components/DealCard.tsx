@@ -20,25 +20,22 @@ export const DealCard = ({ deal, index, icon: Icon }: DealCardProps) => {
     >
       {/* Badge */}
       <div className="absolute -top-3 -right-3 z-10">
-        <div
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r ${deal.gradient}
-                      text-white rounded-full shadow-xl text-xs sm:text-sm font-bold
-                      animate-pulse`}
-        >
+        <div className={`px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r ${deal.gradient}
+                      text-white rounded-full shadow-lg text-xs sm:text-sm font-bold`}>
           {deal.badge}
         </div>
       </div>
 
       {/* Card */}
       <div
-        className="bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl
+        className="bg-white dark:bg-slate-800 rounded-3xl
                    shadow-xl hover:shadow-2xl
-                   border-2 border-slate-200 dark:border-slate-700
+                   border-0
                    overflow-hidden transition-all duration-300
-                   hover:-translate-y-2 h-full"
+                   hover:-translate-y-3 h-full"
       >
-        {/* Header with gradient */}
-        <div className={`bg-gradient-to-r ${deal.gradient} p-4 sm:p-6 text-white`}>
+        {/* Header - gradient */}
+        <div className={`bg-gradient-to-r ${deal.gradient} p-6 sm:p-8 text-white`}>
           <div className="flex items-start justify-between mb-3 sm:mb-4">
             <div>
               <h3 className="text-xl sm:text-2xl font-bold mb-1">{deal.title}</h3>
@@ -64,11 +61,13 @@ export const DealCard = ({ deal, index, icon: Icon }: DealCardProps) => {
         </div>
 
         {/* Features */}
-        <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
+        <div className="p-6 sm:p-8 space-y-3 sm:space-y-4">
           {deal.features.map((feature) => (
-            <div key={feature} className="flex items-center gap-2 sm:gap-3">
-              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-              <span className="text-slate-700 dark:text-slate-300 text-sm sm:text-base">
+            <div key={feature} className="flex items-center gap-3 sm:gap-4">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/30 flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <span className="text-gray-700 dark:text-gray-200 text-sm sm:text-base">
                 {feature}
               </span>
             </div>
@@ -76,14 +75,14 @@ export const DealCard = ({ deal, index, icon: Icon }: DealCardProps) => {
         </div>
 
         {/* CTA Button */}
-        <div className="p-4 sm:p-6 pt-0">
+        <div className="p-6 sm:p-8 pt-0">
           <Link
             to="/contract"
             state={{ deal }}
-            className={`w-full block text-center px-4 sm:px-6 py-3 sm:py-4
-                      bg-gradient-to-r ${deal.gradient}
-                      text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl
-                      hover:scale-105 transition-all duration-300 shadow-lg`}
+            className={`w-full block text-center px-6 sm:px-8 py-3 sm:py-4
+                      bg-green-500 hover:bg-green-600
+                      text-white font-bold text-sm sm:text-base rounded-full
+                      hover:shadow-xl hover:scale-105 transition-all duration-300 shadow-lg`}
           >
             הזמן את המבצע
           </Link>

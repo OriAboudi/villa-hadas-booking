@@ -40,12 +40,12 @@ const InputField: React.FC<InputFieldProps> = ({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label className="block text-sm font-bold text-luxury-navy dark:text-luxury-ivory">
+        {label} {required && <span className="text-luxury-gold">*</span>}
       </label>
       <div className="relative">
         {Icon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-luxury-slate dark:text-luxury-mist">
             <Icon size={20} />
           </div>
         )}
@@ -58,20 +58,20 @@ const InputField: React.FC<InputFieldProps> = ({
           maxLength={maxLength}
           min={min}
           max={max}
-          className={`w-full ${Icon ? 'pr-12' : 'pr-4'} pl-4 py-3 rounded-xl border-2 
+          className={`w-full ${Icon ? 'pr-12' : 'pr-4'} pl-4 py-3 rounded-lg border-2
                      font-medium transition-all duration-200
-                     focus:outline-none focus:ring-4 focus:ring-blue-500/20
-                     dark:bg-slate-800 dark:text-white
+                     focus:outline-none focus:ring-4 focus:ring-luxury-gold/20
+                     dark:bg-luxury-navy dark:text-white
                      ${error
               ? 'border-red-500 bg-red-50 dark:bg-red-900/10'
               : hasValue
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/10'
-                : 'border-slate-300 dark:border-slate-600 bg-white'
+                ? 'border-luxury-gold bg-luxury-ivory/50 dark:bg-luxury-navy/50'
+                : 'border-luxury-mist dark:border-luxury-navy-dark bg-white dark:bg-luxury-navy/30'
             }`}
         />
         {hasValue && !error && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <Check size={20} className="text-green-500" />
+            <Check size={20} className="text-luxury-gold" />
           </div>
         )}
       </div>
@@ -281,7 +281,7 @@ export const ContractPage = () => {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-12 px-4">
+    <div className="min-h-screen bg-luxury-ivory dark:bg-luxury-navy py-12 px-4">
       <div className="max-w-4xl mx-auto">
 
         {/* Header */}
@@ -290,11 +290,14 @@ export const ContractPage = () => {
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-display font-bold mb-4 text-slate-900 dark:text-white">
-            טופס הזמנה
+          <div className="mb-4">
+            <div className="h-1 w-20 bg-luxury-gold mx-auto mb-6"></div>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-display font-bold mb-4 text-luxury-navy dark:text-luxury-ivory">
+            שמור מקום בוילה הדס
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400">
-            מלאו את הפרטים ונשלח אליכם אישור בדוא"ל
+          <p className="text-lg text-luxury-slate dark:text-luxury-mist max-w-2xl mx-auto">
+            שמרו את המקום שלכם עוד היום. מייד נחזור אליכם עם הצעת מחיר מותאמת אישית וכל הפרטים שתצטרכו.
           </p>
         </motion.div>
 
@@ -304,33 +307,33 @@ export const ContractPage = () => {
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className={`mb-8 p-6 rounded-2xl border-2 bg-gradient-to-r ${dealFromState.gradient} bg-opacity-10
-                       border-transparent shadow-lg`}
+            className="mb-8 p-8 rounded-xl border-2 border-luxury-gold bg-white dark:bg-luxury-navy
+                       shadow-md"
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <h3 className="text-xl md:text-2xl font-bold text-luxury-navy dark:text-luxury-ivory mb-2">
                   {dealFromState.title}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-3">
+                <p className="text-luxury-slate dark:text-luxury-mist mb-3">
                   {dealFromState.description}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {dealFromState.features.slice(0, 3).map((feature) => (
-                    <span key={feature} className="px-3 py-1 bg-white dark:bg-slate-700 rounded-full text-sm">
+                    <span key={feature} className="px-3 py-1 bg-luxury-ivory dark:bg-luxury-navy-dark rounded-sm text-sm text-luxury-navy dark:text-luxury-ivory">
                       ✓ {feature}
                     </span>
                   ))}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-slate-600 dark:text-slate-400 line-through">
+                <div className="text-sm text-luxury-slate dark:text-luxury-mist line-through">
                   ₪{dealFromState.originalPrice}
                 </div>
-                <div className="text-3xl font-black text-slate-900 dark:text-white">
+                <div className="text-3xl font-black text-luxury-navy dark:text-luxury-ivory">
                   ₪{dealFromState.salePrice}
                 </div>
-                <div className="text-sm font-bold text-green-600 dark:text-green-400">
+                <div className="text-sm font-bold text-luxury-gold">
                   -{dealFromState.discount}
                 </div>
               </div>
@@ -344,17 +347,17 @@ export const ContractPage = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 md:p-12 space-y-10"
+          className="bg-white dark:bg-luxury-navy/30 rounded-2xl shadow-lg p-8 md:p-12 space-y-10 border border-luxury-mist dark:border-luxury-navy-dark"
         >
 
           {/* Personal Details */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 
-                            flex items-center justify-center shadow-lg">
-                <User className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-luxury-mist dark:border-luxury-navy-dark">
+              <div className="w-12 h-12 rounded-lg bg-luxury-navy dark:bg-luxury-gold
+                            flex items-center justify-center shadow-md">
+                <User className="w-6 h-6 text-white dark:text-luxury-navy" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">פרטים אישיים</h2>
+              <h2 className="text-2xl font-bold text-luxury-navy dark:text-luxury-ivory">פרטים אישיים</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               <InputField
@@ -403,12 +406,12 @@ export const ContractPage = () => {
 
           {/* Dates */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 
-                            flex items-center justify-center shadow-lg">
-                <Calendar className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-luxury-mist dark:border-luxury-navy-dark">
+              <div className="w-12 h-12 rounded-lg bg-luxury-navy dark:bg-luxury-gold
+                            flex items-center justify-center shadow-md">
+                <Calendar className="w-6 h-6 text-white dark:text-luxury-navy" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">תאריכי שהייה</h2>
+              <h2 className="text-2xl font-bold text-luxury-navy dark:text-luxury-ivory">תאריכי שהייה</h2>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               <InputField
@@ -432,12 +435,12 @@ export const ContractPage = () => {
                 min={formData.checkIn || new Date().toISOString().split('T')[0]}
               />
               <div className="space-y-2">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                <label className="block text-sm font-bold text-luxury-navy dark:text-luxury-ivory">
                   מספר לילות
                 </label>
-                <div className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-600
-                              bg-slate-50 dark:bg-slate-900 font-bold text-lg text-center
-                              text-blue-600 dark:text-blue-400">
+                <div className="w-full px-4 py-3 rounded-lg border-2 border-luxury-gold
+                              bg-luxury-ivory dark:bg-luxury-navy/50 font-bold text-lg text-center
+                              text-luxury-navy dark:text-luxury-ivory">
                   {nights || 0}
                 </div>
               </div>
@@ -446,12 +449,12 @@ export const ContractPage = () => {
 
           {/* Guests */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 
-                            flex items-center justify-center shadow-lg">
-                <User className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-luxury-mist dark:border-luxury-navy-dark">
+              <div className="w-12 h-12 rounded-lg bg-luxury-navy dark:bg-luxury-gold
+                            flex items-center justify-center shadow-md">
+                <User className="w-6 h-6 text-white dark:text-luxury-navy" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">מספר אורחים</h2>
+              <h2 className="text-2xl font-bold text-luxury-navy dark:text-luxury-ivory">מספר אורחים</h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               <InputField
@@ -481,21 +484,21 @@ export const ContractPage = () => {
           {/* Deal Selector */}
           {availableDeals.length > 0 && (
             <section>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500
-                              flex items-center justify-center shadow-lg">
-                  <Gift className="w-6 h-6 text-white" />
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-luxury-mist dark:border-luxury-navy-dark">
+                <div className="w-12 h-12 rounded-lg bg-luxury-navy dark:bg-luxury-gold
+                              flex items-center justify-center shadow-md">
+                  <Gift className="w-6 h-6 text-white dark:text-luxury-navy" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">בחר מבצע (אופציונלי)</h2>
+                <h2 className="text-2xl font-bold text-luxury-navy dark:text-luxury-ivory">בחר מבצע (אופציונלי)</h2>
               </div>
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20
-                            rounded-2xl p-6 border-2 border-amber-200 dark:border-amber-800">
+              <div className="bg-luxury-cream dark:bg-luxury-navy/20
+                            rounded-xl p-6 border-2 border-luxury-mist dark:border-luxury-navy-dark">
                 <select
                   value={selectedDealId || ''}
                   onChange={handleDealChange}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-amber-300 dark:border-amber-700
-                           bg-white dark:bg-slate-800 text-slate-900 dark:text-white
-                           focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-luxury-gold dark:border-luxury-gold
+                           bg-white dark:bg-luxury-navy text-luxury-navy dark:text-luxury-ivory
+                           focus:ring-2 focus:ring-luxury-gold/50 focus:border-luxury-gold transition-all"
                 >
                   <option value="">-- ללא מבצע (מחיר רגיל) --</option>
                   {availableDeals.map((deal) => (
@@ -504,7 +507,7 @@ export const ContractPage = () => {
                     </option>
                   ))}
                 </select>
-                <p className="mt-3 text-sm text-amber-700 dark:text-amber-300">
+                <p className="mt-3 text-sm text-luxury-slate dark:text-luxury-mist">
                   💡 בחר מבצע כדי לקבל מחיר מיוחד. המחיר יתעדכן אוטומטית.
                 </p>
               </div>
@@ -513,27 +516,27 @@ export const ContractPage = () => {
 
           {/* Payment Summary */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 
-                            flex items-center justify-center shadow-lg">
-                <CreditCard className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-luxury-mist dark:border-luxury-navy-dark">
+              <div className="w-12 h-12 rounded-lg bg-luxury-navy dark:bg-luxury-gold
+                            flex items-center justify-center shadow-md">
+                <CreditCard className="w-6 h-6 text-white dark:text-luxury-navy" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">סיכום תשלום</h2>
+              <h2 className="text-2xl font-bold text-luxury-navy dark:text-luxury-ivory">הערכת מחיר</h2>
             </div>
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800
-                          rounded-2xl p-6 space-y-4">
+            <div className="bg-luxury-cream dark:bg-luxury-navy/20
+                          rounded-xl p-6 space-y-4 border border-luxury-mist dark:border-luxury-navy-dark">
               <div className="flex justify-between items-center text-lg">
-                <span className="text-slate-600 dark:text-slate-400">מחיר ללילה:</span>
-                <span className="font-bold text-slate-900 dark:text-white">₪{pricePerNight.toLocaleString('he-IL')}</span>
+                <span className="text-luxury-slate dark:text-luxury-mist">מחיר ללילה:</span>
+                <span className="font-bold text-luxury-navy dark:text-luxury-ivory">₪{pricePerNight.toLocaleString('he-IL')}</span>
               </div>
               <div className="flex justify-between items-center text-lg">
-                <span className="text-slate-600 dark:text-slate-400">מספר לילות:</span>
-                <span className="font-bold text-slate-900 dark:text-white">{nights}</span>
+                <span className="text-luxury-slate dark:text-luxury-mist">מספר לילות:</span>
+                <span className="font-bold text-luxury-navy dark:text-luxury-ivory">{nights}</span>
               </div>
-              <div className="h-px bg-slate-300 dark:bg-slate-600"></div>
+              <div className="h-px bg-luxury-mist dark:bg-luxury-navy-dark"></div>
               <div className="flex justify-between items-center text-2xl">
-                <span className="font-bold text-slate-900 dark:text-white">סה״כ:</span>
-                <span className="font-bold text-blue-600 dark:text-blue-400">
+                <span className="font-bold text-luxury-navy dark:text-luxury-ivory">הערכת סכום:</span>
+                <span className="font-bold text-luxury-gold">
                   {formatCurrency(totalPrice)}
                 </span>
               </div>
@@ -560,38 +563,38 @@ export const ContractPage = () => {
 
           {/* Terms */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 
-                            flex items-center justify-center shadow-lg">
-                <FileText className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-luxury-mist dark:border-luxury-navy-dark">
+              <div className="w-12 h-12 rounded-lg bg-luxury-navy dark:bg-luxury-gold
+                            flex items-center justify-center shadow-md">
+                <FileText className="w-6 h-6 text-white dark:text-luxury-navy" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">תנאים והגבלות</h2>
+              <h2 className="text-2xl font-bold text-luxury-navy dark:text-luxury-ivory">תנאים והגבלות</h2>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 max-h-60 overflow-y-auto 
-                          border-2 border-slate-200 dark:border-slate-700">
-              <ul className="space-y-3 text-slate-700 dark:text-slate-300">
+            <div className="bg-luxury-cream dark:bg-luxury-navy/20 rounded-xl p-6 max-h-60 overflow-y-auto
+                          border-2 border-luxury-mist dark:border-luxury-navy-dark">
+              <ul className="space-y-3 text-luxury-charcoal dark:text-luxury-mist">
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-luxury-gold flex-shrink-0 mt-0.5" />
                   <span>ביטול עד 30 יום לפני - החזר מלא למעט דמי ביטול של 300 ₪</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-luxury-gold flex-shrink-0 mt-0.5" />
                   <span>ביטול 14-30 יום לפני - דמי ביטול 25%</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-luxury-gold flex-shrink-0 mt-0.5" />
                   <span>ביטול פחות מ-14 יום לפני - דמי ביטול 50%</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-luxury-gold flex-shrink-0 mt-0.5" />
                   <span>שעת כניסה: 15:00 | שעת יציאה: 11:00</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-luxury-gold flex-shrink-0 mt-0.5" />
                   <span>אסור לעשן בתוך הוילה</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-luxury-gold flex-shrink-0 mt-0.5" />
                   <span>שעות שקט: 23:00-07:00</span>
                 </li>
               </ul>
@@ -601,11 +604,11 @@ export const ContractPage = () => {
               <input
                 type="checkbox"
                 required
-                className="w-5 h-5 rounded border-2 border-slate-300 dark:border-slate-600
-                         text-blue-600 focus:ring-4 focus:ring-blue-500/20
-                         cursor-pointer"
+                className="w-5 h-5 rounded border-2 border-luxury-mist dark:border-luxury-navy-dark
+                         text-luxury-navy focus:ring-4 focus:ring-luxury-gold/20
+                         cursor-pointer accent-luxury-navy dark:accent-luxury-gold"
               />
-              <span className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <span className="text-sm text-luxury-charcoal dark:text-luxury-mist group-hover:text-luxury-navy dark:group-hover:text-luxury-gold transition-colors">
                 אני מאשר/ת שקראתי והבנתי את התנאים וההגבלות
               </span>
             </label>
@@ -615,11 +618,11 @@ export const ContractPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-5 rounded-2xl font-bold text-lg
-                     bg-gradient-to-r from-blue-600 to-purple-600 text-white
-                     shadow-xl hover:shadow-2xl
+            className="w-full py-5 rounded-lg font-bold text-lg
+                     bg-luxury-navy dark:bg-luxury-gold text-white dark:text-luxury-navy
+                     shadow-md hover:shadow-lg
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-300 hover:scale-[1.02]
+                     transition-all duration-300 hover:bg-luxury-navy-dark dark:hover:bg-luxury-gold-dark
                      flex items-center justify-center gap-3"
           >
             {loading ? (
@@ -630,12 +633,12 @@ export const ContractPage = () => {
             ) : success ? (
               <>
                 <Check className="w-6 h-6" />
-                <span>נשלח בהצלחה!</span>
+                <span>התקבל בהצלחה! נחזור אליך בקרוב</span>
               </>
             ) : (
               <>
                 <Send className="w-6 h-6" />
-                <span>שלח הזמנה</span>
+                <span>שמור את המקום שלי</span>
               </>
             )}
           </button>
@@ -653,17 +656,20 @@ export const ContractPage = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="bg-white dark:bg-slate-800 rounded-3xl p-12 max-w-md text-center shadow-2xl"
+            className="bg-white dark:bg-luxury-navy rounded-2xl p-12 max-w-md text-center shadow-lg border border-luxury-gold"
           >
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 
-                          rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Check className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 bg-luxury-navy dark:bg-luxury-gold
+                          rounded-full flex items-center justify-center mx-auto mb-6 shadow-md">
+              <Check className="w-10 h-10 text-white dark:text-luxury-navy" />
             </div>
-            <h2 className="text-3xl font-bold mb-4 text-slate-900 dark:text-white">
-              ההזמנה נשלחה בהצלחה!
+            <h2 className="text-3xl font-bold mb-4 text-luxury-navy dark:text-luxury-ivory font-display">
+              המקום שלך שמור!
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 text-lg">
-              קיבלתם אישור במייל. נחזור אליכם בהקדם!
+            <p className="text-luxury-slate dark:text-luxury-mist text-lg mb-4">
+              קיבלתם אישור במייל. נציג שלנו יחזור אליכם בקרוב עם הצעת מחיר מותאמת אישית.
+            </p>
+            <p className="text-sm text-luxury-gold font-medium">
+              תודה שבחרתם בוילת הדס! 🏡
             </p>
           </motion.div>
         </motion.div>
