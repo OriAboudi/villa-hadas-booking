@@ -324,6 +324,38 @@ export const DealsTab = () => {
             />
           </div>
 
+          {/* Gradient Color Selector */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+              צבע הרקע של הכרטיס
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { name: 'ורוד', gradient: 'from-rose-500 to-pink-600' },
+                { name: 'כתום', gradient: 'from-amber-500 to-orange-600' },
+                { name: 'סגול', gradient: 'from-violet-500 to-purple-600' },
+                { name: 'כחול', gradient: 'from-blue-500 to-cyan-500' },
+                { name: 'ירוק', gradient: 'from-emerald-500 to-teal-600' },
+                { name: 'אדום', gradient: 'from-red-500 to-rose-600' },
+              ].map((option) => (
+                <button
+                  key={option.gradient}
+                  onClick={() => setFormData({ ...formData, gradient: option.gradient })}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    formData.gradient === option.gradient
+                      ? 'border-slate-900 dark:border-white'
+                      : 'border-slate-300 dark:border-slate-600'
+                  }`}
+                  title={option.name}
+                >
+                  <div
+                    className={`h-8 rounded bg-gradient-to-r ${option.gradient}`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Active Status */}
           <div className="flex items-center gap-3">
             <input
