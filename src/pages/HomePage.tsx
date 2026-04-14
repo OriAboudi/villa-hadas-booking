@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Deal, Invitation, ImageAsset } from '../types';
-import { getActiveDeals, getAllInvitations, getImagesByCategory } from '../lib/firebase';
+import type { Deal, ImageAsset } from '../types';
+import { getActiveDeals, getImagesByCategory } from '../lib/firebase';
 import { DealCard } from '../components/DealCard';
-import { LoadingSpinner } from '../components/LoadingSpinner';
 import { SkeletonCard } from '../components/SkeletonCard';
 
 const FEATURES = [
@@ -33,43 +32,6 @@ const FEATURES = [
         title: 'עד 12 אורחים',
         desc: '5 חדרי שינה מרווחים, כולל ג׳קוזי בחדרים העליונים',
         gradient: 'from-green-500 to-emerald-500',
-    },
-];
-
-
-const HOT_DEALS = [
-    {
-        title: 'מבצע סופ"ש',
-        originalPrice: '₪3,500',
-        salePrice: '₪2,800',
-        discount: '20%',
-        description: 'שישי-שבת (2 לילות)',
-        badge: 'הכי פופולרי',
-        gradient: 'from-rose-500 to-pink-600',
-        icon: Calendar,
-        features: ['צ\'ק אין מוקדם', 'ארוחת בוקר', 'ניקיון חינם']
-    },
-    {
-        title: 'חבילת אמצע שבוע',
-        originalPrice: '₪2,000',
-        salePrice: '₪1,500',
-        discount: '25%',
-        description: 'ראשון-רביעי (4 לילות)',
-        badge: 'חיסכון מקסימלי',
-        gradient: 'from-amber-500 to-orange-600',
-        icon: TrendingDown,
-        features: ['גמישות בשעות', 'מחיר מיוחד', 'שדרוג חדר']
-    },
-    {
-        title: 'דיל בזק',
-        originalPrice: '₪1,200',
-        salePrice: '₪999',
-        discount: '17%',
-        description: 'לילה אחד (ימים נבחרים)',
-        badge: 'מוגבל!',
-        gradient: 'from-violet-500 to-purple-600',
-        icon: Zap,
-        features: ['צ\'ק אאוט מאוחר', 'ברוכים הבאים', 'WiFi מהיר']
     },
 ];
 
@@ -164,26 +126,23 @@ const WHY_CHOOSE_US = [
 export const HomePage = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [deals, setDeals] = useState<Deal[]>(FALLBACK_DEALS);
-    const [invitations, setInvitations] = useState<Invitation[]>([]);
     const [heroImages, setHeroImages] = useState<ImageAsset[]>([]);
     const [galleryImages, setGalleryImages] = useState<ImageAsset[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Load deals, invitations, and images from Firebase
+    // Load deals and images from Firebase
     useEffect(() => {
         const loadData = async () => {
             try {
                 setLoading(true);
-                const [dealsData, invitationsData, heroImgsData, galleryImgsData] = await Promise.all([
+                const [dealsData, heroImgsData, galleryImgsData] = await Promise.all([
                     getActiveDeals(),
-                    getAllInvitations(),
                     getImagesByCategory('hero'),
                     getImagesByCategory('gallery'),
                 ]);
                 if (dealsData.length > 0) {
                     setDeals(dealsData);
                 }
-                setInvitations(invitationsData);
                 setHeroImages(heroImgsData);
                 setGalleryImages(galleryImgsData);
             } catch (error) {
@@ -199,7 +158,6 @@ export const HomePage = () => {
 
     // Image carousel
     useEffect(() => {
-        const imagesToUse = heroImages.length > 0 ? heroImages : FALLBACK_IMAGES;
         const maxImages = heroImages.length > 0 ? heroImages.length : FALLBACK_IMAGES.length;
 
         const interval = setInterval(() => {

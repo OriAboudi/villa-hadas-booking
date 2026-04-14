@@ -74,7 +74,7 @@ export const ImagesTab = () => {
       setUploading(true);
       setUploadProgress(0);
 
-      const downloadURL = await uploadImage(file, selectedCategory, (progress) => {
+      const downloadURL = await uploadImage(file, (progress) => {
         setUploadProgress(Math.round(progress));
       });
 

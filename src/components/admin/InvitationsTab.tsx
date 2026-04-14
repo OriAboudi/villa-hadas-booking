@@ -23,7 +23,7 @@ export const InvitationsTab = () => {
     phoneNumber: '',
     email: '',
     specialRequests: '',
-    status: 'pending' as const,
+    status: 'pending' as 'pending' | 'confirmed' | 'cancelled',
     color: '#3B82F6',
   });
 

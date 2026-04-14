@@ -98,7 +98,7 @@
 
 
 import { Link, useLocation } from 'react-router-dom';
-import { Home, FileText, Shield, Sun, Moon, Menu, X } from 'lucide-react';
+import { Home, FileText, Sun, Moon, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export const Navbar = () => {

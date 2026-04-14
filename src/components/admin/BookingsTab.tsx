@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Users, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Check, X } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Calendar as CalendarIcon, Users, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Check } from 'lucide-react';
 import type { BookingData } from '../../types';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { getAllBookings, updateBooking } from '../../lib/firebase';
@@ -55,32 +54,6 @@ export const BookingsTab = () => {
     totalBalance: bookings.reduce((sum, b) => sum + b.balance, 0),
   };
 
-  // Monthly revenue data
-  const getMonthlyData = () => {
-    const monthlyRevenue: Record<number, number> = {};
-
-    bookings.forEach(booking => {
-      const date = new Date(booking.checkIn);
-      const month = date.getMonth();
-      monthlyRevenue[month] = (monthlyRevenue[month] || 0) + booking.totalPrice;
-    });
-
-    const monthNames = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
-
-    return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
-      month: monthNames[parseInt(month)],
-      revenue,
-    }));
-  };
-
-  const monthlyData = getMonthlyData();
-
-  // Status distribution
-  const statusData = [
-    { name: 'מאושר', value: stats.confirmedBookings, color: '#10b981' },
-    { name: 'ממתין', value: stats.pendingBookings, color: '#f59e0b' },
-    { name: 'בוטל', value: bookings.filter(b => b.status === 'cancelled').length, color: '#ef4444' },
-  ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {

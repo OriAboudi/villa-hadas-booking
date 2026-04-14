@@ -14,11 +14,7 @@ import {
   setDoc
 } from 'firebase/firestore';
 import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject
+  getStorage
 } from 'firebase/storage';
 import type { BookingData, Deal, Invitation, ImageAsset, PageSettings } from '../types';
 
@@ -304,7 +300,6 @@ export const deleteInvitation = async (id: string) => {
 // העלאת תמונה כ-Base64 (bypass CORS issues)
 export const uploadImage = async (
   file: File,
-  category: string,
   onProgress: (progress: number) => void
 ): Promise<string> => {
   try {
@@ -450,7 +445,6 @@ export const deleteImage = async (id: string) => {
 // קבלת הגדרות העמוד
 export const getPageSettings = async (): Promise<PageSettings> => {
   try {
-    const docRef = doc(db, 'settings', 'pageSettings');
     const docSnap = await getDocs(collection(db, 'settings'));
 
     let settings: PageSettings | null = null;

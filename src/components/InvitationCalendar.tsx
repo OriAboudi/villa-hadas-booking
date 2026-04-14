@@ -140,12 +140,14 @@ export const InvitationCalendar = ({
               const dateStr = day
                 ? formatDateKey(year, month, day)
                 : null;
-              const dayEvents = dateStr ? getEventsForDate(dateStr) : [];
+              const dayEvents = dateStr ? getEventsForDate(dateStr) : { invitations: [], bookings: [] };
               const isToday =
                 day &&
                 new Date().getDate() === day &&
                 new Date().getMonth() === month &&
                 new Date().getFullYear() === year;
+
+              const hasEvents = dayEvents.invitations.length > 0 || dayEvents.bookings.length > 0;
 
               return (
                 <motion.div
@@ -156,7 +158,7 @@ export const InvitationCalendar = ({
                       ? 'bg-transparent'
                       : isToday
                       ? 'bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500'
-                      : dayEvents.length > 0
+                      : hasEvents
                       ? 'bg-slate-50 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600'
                       : 'bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700'
                   } ${day ? 'cursor-pointer' : ''}`}
@@ -179,7 +181,7 @@ export const InvitationCalendar = ({
                       </div>
 
                       {/* Event Dots - Invitations (blue) and Bookings (green) */}
-                      {(dayEvents.invitations.length > 0 || dayEvents.bookings.length > 0) && (
+                      {hasEvents && (
                         <div className="flex justify-center gap-0.5 flex-wrap">
                           {/* Invitation dots */}
                           {dayEvents.invitations.slice(0, 1).map((event, idx) => (
