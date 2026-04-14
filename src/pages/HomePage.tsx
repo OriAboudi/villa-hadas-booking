@@ -31,7 +31,7 @@ const FEATURES = [
         icon: Users,
         title: 'עד 12 אורחים',
         desc: '5 חדרי שינה מרווחים, כולל ג׳קוזי בחדרים העליונים',
-        gradient: 'from-green-500 to-emerald-500',
+        gradient: 'from-blue-500 to-cyan-500',
     },
 ];
 
@@ -234,7 +234,7 @@ export const HomePage = () => {
                                 to="/contract"
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2
                                          px-8 sm:px-16 md:px-24 py-4 sm:py-6
-                                         bg-green-500 hover:bg-green-600
+                                         bg-blue-600 hover:bg-blue-700
                                          text-white font-bold text-base sm:text-lg md:text-xl
                                          rounded-full shadow-xl
                                          hover:shadow-2xl hover:scale-105
@@ -247,8 +247,8 @@ export const HomePage = () => {
                                 href="tel:0503313193"
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2
                                          px-8 sm:px-16 md:px-24 py-4 sm:py-6
-                                         bg-white dark:bg-slate-800 text-green-600 dark:text-green-400
-                                         font-bold text-base sm:text-lg md:text-xl border-2 border-green-500
+                                         bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400
+                                         font-bold text-base sm:text-lg md:text-xl border-2 border-blue-600
                                          rounded-full shadow-xl
                                          hover:shadow-2xl hover:scale-105
                                          transition-all duration-300 active:scale-95"
@@ -310,7 +310,7 @@ export const HomePage = () => {
                         className="text-center mb-8 sm:mb-12"
                     >
                         <div className="inline-flex items-center gap-2 px-5 sm:px-7 py-2.5
-                                      bg-gradient-to-r from-red-500 to-orange-500
+                                      bg-blue-600
                                       text-white rounded-full mb-4 text-sm sm:text-base font-bold shadow-lg">
                             🔥 מבצעים חמים
                         </div>
@@ -356,7 +356,7 @@ export const HomePage = () => {
                         className="mt-8 sm:mt-12 text-center"
                     >
                         <div className="inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-10 py-3 sm:py-4
-                                      bg-green-500
+                                      bg-blue-600
                                       text-white rounded-full shadow-lg text-sm sm:text-base font-bold">
                             <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
                             <span>⏰ המבצעים תקפים עד סוף החודש בלבד!</span>
@@ -637,7 +637,7 @@ export const HomePage = () => {
                             <Link
                                 to="/contract"
                                 className="inline-flex items-center justify-center gap-3 px-10 sm:px-18 md:px-24 py-4 sm:py-6 md:py-7
-                                         bg-white text-green-600 font-bold text-base sm:text-lg md:text-xl
+                                         bg-white text-blue-600 font-bold text-base sm:text-lg md:text-xl
                                          rounded-full shadow-xl hover:shadow-2xl hover:scale-110 hover:bg-gray-50
                                          transition-all duration-300 active:scale-95"
                             >
