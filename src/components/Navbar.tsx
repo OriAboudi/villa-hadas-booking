@@ -131,7 +131,7 @@ export const Navbar = () => {
   const navLinks = [
     { to: '/', icon: Home, label: 'בית' },
     { to: '/contract', icon: FileText, label: 'הזמנה' },
-    { to: '/admin', icon: Shield, label: 'ניהול' },
+    // Admin link hidden from navbar - access via direct URL
   ];
 
   return (

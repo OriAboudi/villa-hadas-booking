@@ -19,6 +19,7 @@ export const SettingsTab = () => {
     featuresTitle: 'המשכנעות שלנו',
     siteTitle: 'Villa Hadas',
     siteLogo: '',
+    pricePerNight: 1500,
     updatedAt: new Date().toISOString(),
   });
 
@@ -223,6 +224,30 @@ export const SettingsTab = () => {
                 placeholder="+972-2-123-4567"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Pricing Section */}
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
+            💰 תמחור
+          </h3>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              מחיר ללילה (₪)
+            </label>
+            <input
+              type="number"
+              value={formData.pricePerNight}
+              onChange={(e) => setFormData({ ...formData, pricePerNight: parseInt(e.target.value) || 0 })}
+              className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600
+                       rounded-lg dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+              placeholder="1500"
+              min="0"
+            />
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">
+              מחיר זה ישמש לחישוב מחיר ההזמנה בעמוד ההזמנה
+            </p>
           </div>
         </div>
 

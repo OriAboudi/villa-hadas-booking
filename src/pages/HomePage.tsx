@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, MapPin, Waves, Utensils, Users, Phone, Mail, Calendar, TrendingDown, Zap, CheckCircle, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Deal, Invitation } from '../types';
-import { getActiveDeals, getAllInvitations } from '../lib/firebase';
+import type { Deal, Invitation, ImageAsset } from '../types';
+import { getActiveDeals, getAllInvitations, getImagesByCategory } from '../lib/firebase';
 import { DealCard } from '../components/DealCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { SkeletonCard } from '../components/SkeletonCard';
@@ -165,21 +165,27 @@ export const HomePage = () => {
     const [selectedImage, setSelectedImage] = useState(0);
     const [deals, setDeals] = useState<Deal[]>(FALLBACK_DEALS);
     const [invitations, setInvitations] = useState<Invitation[]>([]);
+    const [heroImages, setHeroImages] = useState<ImageAsset[]>([]);
+    const [galleryImages, setGalleryImages] = useState<ImageAsset[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Load deals and invitations from Firebase
+    // Load deals, invitations, and images from Firebase
     useEffect(() => {
         const loadData = async () => {
             try {
                 setLoading(true);
-                const [dealsData, invitationsData] = await Promise.all([
+                const [dealsData, invitationsData, heroImgsData, galleryImgsData] = await Promise.all([
                     getActiveDeals(),
                     getAllInvitations(),
+                    getImagesByCategory('hero'),
+                    getImagesByCategory('gallery'),
                 ]);
                 if (dealsData.length > 0) {
                     setDeals(dealsData);
                 }
                 setInvitations(invitationsData);
+                setHeroImages(heroImgsData);
+                setGalleryImages(galleryImgsData);
             } catch (error) {
                 console.error('Error loading data:', error);
                 // Keep fallback deals if Firebase fails
@@ -193,12 +199,15 @@ export const HomePage = () => {
 
     // Image carousel
     useEffect(() => {
+        const imagesToUse = heroImages.length > 0 ? heroImages : FALLBACK_IMAGES;
+        const maxImages = heroImages.length > 0 ? heroImages.length : FALLBACK_IMAGES.length;
+
         const interval = setInterval(() => {
-            setSelectedImage((prev) => (prev + 1) % FALLBACK_IMAGES.length);
+            setSelectedImage((prev) => (prev + 1) % maxImages);
         }, 4000); // כל 4 שניות
 
         return () => clearInterval(interval);
-    }, []);
+    }, [heroImages]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -207,18 +216,21 @@ export const HomePage = () => {
             <section className="relative h-[85vh] sm:h-[75vh] md:h-[70vh] min-h-[600px] sm:min-h-[500px] overflow-hidden">
                 {/* Background Images */}
                 <div className="absolute inset-0">
-                    {FALLBACK_IMAGES.map((img, idx) => (
-                        <motion.img
-                            key={img}
-                            src={img}
-                            alt={`וילת הדס ${idx + 1}`}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: selectedImage === idx ? 1 : 0 }}
-                            transition={{ duration: 1, ease: 'easeInOut' }}
-
-                        />
-                    ))}
+                    {(heroImages.length > 0 ? heroImages : FALLBACK_IMAGES.map((img, idx) => ({ storageUrl: img, id: `fallback-${idx}` }))).map((imgData, idx) => {
+                        const src = typeof imgData === 'string' ? imgData : imgData.storageUrl;
+                        const key = typeof imgData === 'string' ? imgData : imgData.id;
+                        return (
+                            <motion.img
+                                key={key}
+                                src={src}
+                                alt={`וילת הדס ${idx + 1}`}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: selectedImage === idx ? 1 : 0 }}
+                                transition={{ duration: 1, ease: 'easeInOut' }}
+                            />
+                        );
+                    })}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent" />
                 </div>
 
@@ -259,16 +271,16 @@ export const HomePage = () => {
                         </p>
 
                         {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-2 sm:pt-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
                             <Link
                                 to="/contract"
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                                         px-8 sm:px-12 md:px-16 py-4 sm:py-5 
-                                         bg-gradient-to-r from-blue-600 to-purple-600
-                                         text-white font-bold text-base sm:text-lg md:text-xl 
+                                         px-8 sm:px-14 md:px-20 py-4 sm:py-6
+                                         bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600
+                                         text-white font-bold text-base sm:text-lg md:text-xl
                                          rounded-full shadow-2xl
-                                         hover:scale-105 hover:shadow-blue-500/50
-                                         transition-all duration-300"
+                                         hover:scale-110 hover:shadow-blue-500/70
+                                         transition-all duration-300 active:scale-95"
                             >
                                 <Calendar className="w-5 h-5" />
                                 הזמן עכשיו
@@ -276,12 +288,12 @@ export const HomePage = () => {
                             <a
                                 href="tel:0503313193"
                                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2
-                                         px-8 sm:px-12 md:px-16 py-4 sm:py-5 
-                                         bg-white/10 backdrop-blur-md text-white 
-                                         font-bold text-base sm:text-lg md:text-xl 
-                                         rounded-full border-2 border-white/30
-                                         hover:bg-white/20 hover:scale-105
-                                         transition-all duration-300"
+                                         px-8 sm:px-14 md:px-20 py-4 sm:py-6
+                                         bg-white/20 backdrop-blur-md text-white
+                                         font-bold text-base sm:text-lg md:text-xl
+                                         rounded-full border-2 border-white/50
+                                         hover:bg-white/30 hover:scale-110 hover:border-white/80
+                                         transition-all duration-300 active:scale-95"
                             >
                                 <Phone className="w-5 h-5" />
                                 התקשר עכשיו
@@ -316,9 +328,9 @@ export const HomePage = () => {
                     {/* Image Dots */}
                     <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2
                                   flex gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full">
-                        {FALLBACK_IMAGES.map((img, idx) => (
+                        {(heroImages.length > 0 ? heroImages : FALLBACK_IMAGES).map((img, idx) => (
                             <button
-                                key={img}
+                                key={typeof img === 'string' ? img : img.id}
                                 onClick={() => setSelectedImage(idx)}
                                 className={`rounded-full transition-all ${selectedImage === idx
                                     ? 'w-8 sm:w-10 h-2 sm:h-2.5 bg-white'
@@ -395,33 +407,46 @@ export const HomePage = () => {
                 </div>
             </section>
 
-            {/* Why Choose Us - NEW */}
-            <section className="py-12 sm:py-16 md:py-20 px-4">
+            {/* Why Choose Us - ENHANCED */}
+            <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-b from-white via-blue-50 to-white dark:from-slate-800 dark:via-slate-800 dark:to-slate-800">
                 <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl sm:text-4xl font-display font-bold text-center mb-8 sm:mb-12 
-                                 text-slate-900 dark:text-white">
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-4xl sm:text-5xl font-display font-bold text-center mb-4
+                                 text-slate-900 dark:text-white"
+                    >
                         למה לבחור בנו?
-                    </h2>
+                    </motion.h2>
+                    <p className="text-center text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-12 sm:mb-16">
+                        חוויית אירוח יוקרתית עם שירות אישי ומקצועי
+                    </p>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                         {WHY_CHOOSE_US.map((item, idx) => (
                             <motion.div
                                 key={item.title}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="text-center p-4 sm:p-6"
+                                transition={{ delay: idx * 0.15 }}
+                                className="group bg-white dark:bg-slate-700/50 rounded-2xl p-6 sm:p-8
+                                         shadow-lg hover:shadow-2xl transition-all duration-300
+                                         hover:-translate-y-2 border border-slate-100 dark:border-slate-600
+                                         hover:border-blue-300 dark:hover:border-blue-500"
                             >
-                                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 
-                                              bg-gradient-to-br from-green-500 to-emerald-500 
-                                              rounded-full flex items-center justify-center shadow-lg">
-                                    <item.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6
+                                              bg-gradient-to-br from-green-500 to-emerald-500
+                                              rounded-2xl flex items-center justify-center shadow-lg
+                                              group-hover:scale-110 group-hover:shadow-green-500/50
+                                              transition-all duration-300">
+                                    <item.icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                                 </div>
-                                <h3 className="font-bold text-base sm:text-lg mb-1 sm:mb-2 
-                                             text-slate-900 dark:text-white">
+                                <h3 className="font-bold text-base sm:text-lg mb-2 sm:mb-3
+                                             text-slate-900 dark:text-white text-center">
                                     {item.title}
                                 </h3>
-                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 text-center leading-relaxed">
                                     {item.desc}
                                 </p>
                             </motion.div>
@@ -431,17 +456,22 @@ export const HomePage = () => {
             </section>
 
             {/* Features */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 bg-white dark:bg-slate-800">
+            <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
                 <div className="max-w-7xl mx-auto">
-                    <motion.h2
+                    <motion.div
                         initial={{ y: 20, opacity: 0 }}
                         whileInView={{ y: 0, opacity: 1 }}
                         viewport={{ once: true }}
-                        className="text-3xl sm:text-4xl font-display font-bold text-center 
-                                 mb-8 sm:mb-12 text-slate-900 dark:text-white"
+                        className="text-center mb-12 sm:mb-16"
                     >
-                        מה מחכה לכם?
-                    </motion.h2>
+                        <h2 className="text-4xl sm:text-5xl font-display font-bold
+                                     text-slate-900 dark:text-white mb-4">
+                            מה מחכה לכם?
+                        </h2>
+                        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                            כל מה שאתם צריכים לחופשה מושלמת
+                        </p>
+                    </motion.div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                         {FEATURES.map((feature, idx) => (
                             <motion.div
@@ -450,18 +480,25 @@ export const HomePage = () => {
                                 whileInView={{ y: 0, opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="bg-slate-50 dark:bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-lg 
-                                         hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                                className="group relative bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl
+                                         shadow-lg hover:shadow-2xl transition-all duration-300
+                                         hover:-translate-y-3 border border-slate-100 dark:border-slate-700
+                                         hover:border-blue-300 dark:hover:border-blue-500
+                                         overflow-hidden"
                             >
-                                <div className={`w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br ${feature.gradient} 
-                                              rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-xl 
-                                              hover:scale-110 transition-transform duration-300`}>
-                                    <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-lg" />
+                                {/* Gradient accent */}
+                                <div className={`absolute -top-12 -right-12 w-24 h-24 bg-gradient-to-br ${feature.gradient}
+                                              opacity-5 group-hover:opacity-10 transition-opacity duration-300 rounded-full`}></div>
+
+                                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient}
+                                              rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg
+                                              group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300 relative z-10`}>
+                                    <feature.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-lg" />
                                 </div>
-                                <h3 className="text-lg sm:text-xl font-bold mb-2 text-slate-900 dark:text-white">
+                                <h3 className="text-lg sm:text-xl font-bold mb-3 text-slate-900 dark:text-white relative z-10">
                                     {feature.title}
                                 </h3>
-                                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+                                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
                                     {feature.desc}
                                 </p>
                             </motion.div>
@@ -473,41 +510,55 @@ export const HomePage = () => {
             {/* Gallery */}
             <section className="py-12 sm:py-16 md:py-20 px-4">
                 <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl sm:text-4xl font-display font-bold text-center 
+                    <h2 className="text-3xl sm:text-4xl font-display font-bold text-center
                                  mb-8 sm:mb-12 text-slate-900 dark:text-white">
                         גלריית תמונות
                     </h2>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {FALLBACK_IMAGES.map((img, idx) => (
-                            <motion.div
-                                key={img}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-lg 
-                                         hover:shadow-2xl transition-all duration-300 cursor-pointer
-                                         hover:scale-105"
-                                onClick={() => setSelectedImage(idx)}
-                            >
-                                <img
-                                    src={img}
-                                    alt={`וילת הדס ${idx + 1}`}
-                                    className="w-full h-full object-cover"
-                                />
-                            </motion.div>
-                        ))}
+                        {(galleryImages.length > 0 ? galleryImages : FALLBACK_IMAGES.map((img, idx) => ({ storageUrl: img, id: `fallback-gallery-${idx}` }))).map((imgData, idx) => {
+                            const src = typeof imgData === 'string' ? imgData : imgData.storageUrl;
+                            const key = typeof imgData === 'string' ? imgData : imgData.id;
+                            return (
+                                <motion.div
+                                    key={key}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden shadow-lg
+                                             hover:shadow-2xl transition-all duration-300 cursor-pointer
+                                             hover:scale-105"
+                                    onClick={() => setSelectedImage(idx)}
+                                >
+                                    <img
+                                        src={src}
+                                        alt={`וילת הדס ${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
 
             {/* Reviews */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 bg-white dark:bg-slate-800">
+            <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-b from-white to-blue-50 dark:from-slate-800 dark:to-slate-900">
                 <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl sm:text-4xl font-display font-bold text-center 
-                                 mb-8 sm:mb-12 text-slate-900 dark:text-white">
-                        מה הלקוחות שלנו אומרים?
-                    </h2>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12 sm:mb-16"
+                    >
+                        <h2 className="text-4xl sm:text-5xl font-display font-bold text-center
+                                     text-slate-900 dark:text-white mb-4">
+                            מה הלקוחות שלנו אומרים?
+                        </h2>
+                        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
+                            חוות דעם מהמשפחות שחוו את הוילה
+                        </p>
+                    </motion.div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                         {REVIEWS.map((review, idx) => (
                             <motion.div
@@ -516,20 +567,25 @@ export const HomePage = () => {
                                 whileInView={{ y: 0, opacity: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="bg-slate-50 dark:bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-lg
-                                         hover:shadow-xl transition-all duration-300"
+                                className="group relative bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl
+                                         shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2
+                                         border border-slate-100 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500"
                             >
-                                <div className="flex items-center gap-1 mb-3 sm:mb-4">
+                                {/* Quote mark */}
+                                <div className="absolute top-4 right-4 text-5xl text-blue-200 dark:text-blue-900/30 font-serif">"</div>
+
+                                <div className="flex items-center gap-1 mb-4 sm:mb-6 relative z-10">
                                     {[...Array(review.rating)].map((_, i) => (
-                                        <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400 text-yellow-400" />
+                                        <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
                                     ))}
                                 </div>
-                                <p className="text-slate-700 dark:text-slate-300 mb-4 leading-relaxed text-sm sm:text-base">
-                                    "{review.text}"
+                                <p className="text-slate-700 dark:text-slate-300 mb-6 leading-relaxed text-sm sm:text-base relative z-10">
+                                    {review.text}
                                 </p>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-500 
-                                                  rounded-full flex items-center justify-center text-xl sm:text-2xl">
+                                <div className="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-purple-500
+                                                  rounded-full flex items-center justify-center text-xl sm:text-2xl
+                                                  shadow-lg group-hover:scale-110 transition-transform duration-300">
                                         {review.avatar}
                                     </div>
                                     <div className="flex-1">
@@ -548,74 +604,100 @@ export const HomePage = () => {
             </section>
 
             {/* Contact/Location */}
-            <section className="py-12 sm:py-16 md:py-20 px-4">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl sm:text-4xl font-display font-bold mb-6 sm:mb-8 
-                                 text-slate-900 dark:text-white">
-                        צור קשר
-                    </h2>
-                    <div className="grid sm:grid-cols-3 gap-6 sm:gap-8">
-                        <div className="flex flex-col items-center gap-3">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 
-                                          rounded-full flex items-center justify-center shadow-2xl
-                                          hover:scale-110 hover:rotate-6 transition-all duration-300">
-                                <Phone className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-lg" />
-                            </div>
-                            <a href="tel:0503313193"
-                                className="text-base sm:text-lg font-semibold hover:text-primary-600 
-                transition-colors text-slate-900 dark:text-white">
-                                050-331-3193
-                            </a>
-                        </div>
-                        <div className="flex flex-col items-center gap-3">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 
-                                          rounded-full flex items-center justify-center shadow-2xl
-                                          hover:scale-110 hover:rotate-6 transition-all duration-300">
-                                <Mail className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-lg" />
-                            </div>
-                            <a href="mailto:vilathadass@gmail.com"
-                                className="text-base sm:text-lg font-semibold hover:text-primary-600 
-                                        transition-colors text-slate-900 dark:text-white break-all">
-                                vilathadass@gmail.com
-                            </a>
-                        </div>
-                        <div className="flex flex-col items-center gap-3">
-                            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 
-                                          rounded-full flex items-center justify-center shadow-2xl
-                                          hover:scale-110 hover:rotate-6 transition-all duration-300">
-                                <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-white drop-shadow-lg" />
-                            </div>
-                            <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
-                                רחוב הדס 15, יבניאל
-                            </p>
-                        </div>
+            <section className="py-12 sm:py-16 md:py-20 px-4 bg-white dark:bg-slate-800">
+                <div className="max-w-4xl mx-auto">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12 sm:mb-16"
+                    >
+                        <h2 className="text-4xl sm:text-5xl font-display font-bold
+                                     text-slate-900 dark:text-white mb-4">
+                            צור קשר איתנו
+                        </h2>
+                        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
+                            אנחנו כאן כדי לעזור ולענות לכל שאלה
+                        </p>
+                    </motion.div>
+                    <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                        {[
+                            { Icon: Phone, label: 'טלפון', value: '050-331-3193', href: 'tel:0503313193' },
+                            { Icon: Mail, label: 'אימייל', value: 'vilathadass@gmail.com', href: 'mailto:vilathadass@gmail.com' },
+                            { Icon: MapPin, label: 'כתובת', value: 'רחוב הדס 15, יבניאל', href: '#' },
+                        ].map((item, idx) => (
+                            <motion.a
+                                key={idx}
+                                href={item.href}
+                                initial={{ y: 20, opacity: 0 }}
+                                whileInView={{ y: 0, opacity: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="group flex flex-col items-center gap-4 p-6 sm:p-8
+                                         bg-gradient-to-br from-slate-50 to-white dark:from-slate-700/50 dark:to-slate-800
+                                         rounded-2xl border border-slate-100 dark:border-slate-700
+                                         hover:border-blue-300 dark:hover:border-blue-500
+                                         hover:shadow-lg transition-all duration-300 hover:-translate-y-2"
+                            >
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-purple-600
+                                              rounded-full flex items-center justify-center shadow-lg
+                                              group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300">
+                                    <item.Icon className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-lg" />
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                                        {item.label}
+                                    </p>
+                                    <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                                        {item.value}
+                                    </p>
+                                </div>
+                            </motion.a>
+                        ))}
                     </div>
                 </div>
             </section>
 
             {/* Final CTA */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
+            <section className="py-16 sm:py-20 md:py-24 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500">
                 <div className="max-w-4xl mx-auto text-center">
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="space-y-6 sm:space-y-8"
                     >
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-white mb-4 sm:mb-6">
-                            מוכנים לחוויה בלתי נשכחת?
-                        </h2>
-                        <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8">
-                            הזמינו עכשיו וקבלו הנחה מיוחדת!
-                        </p>
-                        <Link
-                            to="/contract"
-                            className="inline-flex items-center gap-2 sm:gap-3 px-8 sm:px-12 md:px-16 py-4 sm:py-5 md:py-6 
-                                     bg-white text-blue-600 font-bold text-base sm:text-lg md:text-xl 
-                                     rounded-full shadow-2xl hover:scale-105 transition-all duration-300"
-                        >
-                            <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
-                            הזמן את השהות שלך
-                        </Link>
+                        <div>
+                            <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-black text-white mb-4">
+                                מוכנים לחוויה בלתי נשכחת?
+                            </h2>
+                            <p className="text-lg sm:text-xl md:text-2xl text-white/95 leading-relaxed">
+                                הזמינו עכשיו וקבלו הנחה מיוחדת על השהות שלכם!
+                            </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                to="/contract"
+                                className="inline-flex items-center justify-center gap-3 px-10 sm:px-16 md:px-20 py-5 sm:py-6 md:py-7
+                                         bg-white text-blue-600 font-bold text-base sm:text-lg md:text-xl
+                                         rounded-full shadow-2xl hover:scale-110 hover:shadow-white/50
+                                         transition-all duration-300 active:scale-95"
+                            >
+                                <Calendar className="w-6 h-6" />
+                                הזמן עכשיו
+                            </Link>
+                            <a
+                                href="tel:0503313193"
+                                className="inline-flex items-center justify-center gap-3 px-10 sm:px-16 md:px-20 py-5 sm:py-6 md:py-7
+                                         bg-white/20 backdrop-blur-sm text-white font-bold text-base sm:text-lg md:text-xl
+                                         rounded-full border-2 border-white/50 hover:bg-white/30 hover:border-white
+                                         hover:scale-110 transition-all duration-300 active:scale-95"
+                            >
+                                <Phone className="w-6 h-6" />
+                                התקשר
+                            </a>
+                        </div>
                     </motion.div>
                 </div>
             </section>

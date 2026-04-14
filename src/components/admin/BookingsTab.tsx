@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, Users, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, DollarSign, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Check, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import type { BookingData } from '../../types';
 import { formatCurrency, formatDate } from '../../lib/utils';
-import { getAllBookings } from '../../lib/firebase';
+import { getAllBookings, updateBooking } from '../../lib/firebase';
 
 export const BookingsTab = () => {
   const [bookings, setBookings] = useState<BookingData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadBookings();
@@ -26,6 +27,21 @@ export const BookingsTab = () => {
       setError('שגיאה בטעינת ההזמנות');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (bookingId: string, newStatus: 'pending' | 'confirmed' | 'cancelled') => {
+    try {
+      setUpdatingId(bookingId);
+      await updateBooking(bookingId, { status: newStatus });
+      // Update local state
+      setBookings(bookings.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
+      alert(`✅ הזמנה ${newStatus === 'confirmed' ? 'אושרה' : newStatus === 'cancelled' ? 'בוטלה' : 'סומנה כממתינה'}`);
+    } catch (err) {
+      console.error('Error updating booking:', err);
+      alert('❌ שגיאה בעדכון ההזמנה');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -131,158 +147,7 @@ export const BookingsTab = () => {
         </button>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-              <CalendarIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">סה״כ</span>
-          </div>
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            {stats.totalBookings}
-          </div>
-          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">הזמנות</div>
-        </motion.div>
-
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">מאושרות</span>
-          </div>
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            {stats.confirmedBookings}
-          </div>
-          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">הזמנות</div>
-        </motion.div>
-
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
-              <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">ממתינות</span>
-          </div>
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            {stats.pendingBookings}
-          </div>
-          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">הזמנות</div>
-        </motion.div>
-
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-4 sm:p-6 shadow-lg text-white col-span-2 lg:col-span-1"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs sm:text-sm opacity-90">הכנסות</span>
-          </div>
-          <div className="text-3xl font-bold mb-1">{formatCurrency(stats.totalRevenue)}</div>
-          <div className="text-xs sm:text-sm opacity-90">סה״כ</div>
-        </motion.div>
-      </div>
-
-      {/* Charts */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Bar Chart */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg"
-        >
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
-            הכנסות חודשיות
-          </h3>
-          {monthlyData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff' }} />
-                <Bar dataKey="revenue" fill="url(#colorGradient)" radius={[8, 8, 0, 0]} />
-                <defs>
-                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0ea5e9" />
-                    <stop offset="100%" stopColor="#f59e0b" />
-                  </linearGradient>
-                </defs>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[300px] flex items-center justify-center text-slate-400">
-              אין נתונים להצגה
-            </div>
-          )}
-        </motion.div>
-
-        {/* Pie Chart */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg"
-        >
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
-            סטטוס הזמנות
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-4 space-y-2">
-            {statusData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
-                    {item.name}
-                  </span>
-                </div>
-                <span className="font-bold text-slate-900 dark:text-white">
-                  {item.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Bookings Table */}
+      {/* Bookings Table - MAIN */}
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -305,6 +170,7 @@ export const BookingsTab = () => {
                   <th className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300">סכום כולל</th>
                   <th className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300 hidden md:table-cell">יתרה</th>
                   <th className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300">סטטוס</th>
+                  <th className="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-300">פעולות</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
@@ -340,6 +206,33 @@ export const BookingsTab = () => {
                         <span className="hidden sm:inline">{getStatusText(booking.status)}</span>
                       </span>
                     </td>
+                    <td className="px-6 py-4 flex gap-2">
+                      {booking.status === 'pending' && (
+                        <button
+                          onClick={() => handleStatusChange(booking.id!, 'confirmed')}
+                          disabled={updatingId === booking.id}
+                          className="flex items-center gap-1 px-3 py-1 rounded-lg bg-green-100 dark:bg-green-900/30
+                                   text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-200
+                                   dark:hover:bg-green-900/50 transition-colors disabled:opacity-50"
+                          title="אשר הזמנה"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span className="hidden sm:inline">אישור</span>
+                        </button>
+                      )}
+                      <select
+                        value={booking.status}
+                        onChange={(e) => handleStatusChange(booking.id!, e.target.value as 'pending' | 'confirmed' | 'cancelled')}
+                        disabled={updatingId === booking.id}
+                        className="px-3 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white
+                                 dark:bg-slate-700 text-sm text-slate-900 dark:text-white hover:border-blue-500
+                                 transition-colors disabled:opacity-50 cursor-pointer"
+                      >
+                        <option value="pending">ממתין</option>
+                        <option value="confirmed">מאושר</option>
+                        <option value="cancelled">בוטל</option>
+                      </select>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -352,6 +245,76 @@ export const BookingsTab = () => {
           </div>
         )}
       </motion.div>
+
+      {/* Statistics - AT BOTTOM, SMALLER */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-4 shadow"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <CalendarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">סה״כ</span>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {stats.totalBookings}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">הזמנות</div>
+        </motion.div>
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-4 shadow"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+            </div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">מאושרות</span>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {stats.confirmedBookings}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">הזמנות</div>
+        </motion.div>
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-4 shadow"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+              <Clock className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <span className="text-xs text-slate-600 dark:text-slate-400">ממתינות</span>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            {stats.pendingBookings}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">הזמנות</div>
+        </motion.div>
+
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-3 sm:p-4 shadow text-white"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs opacity-90">הכנסות</span>
+          </div>
+          <div className="text-2xl font-bold mb-1">{formatCurrency(stats.totalRevenue)}</div>
+          <div className="text-xs opacity-90">סה״כ</div>
+        </motion.div>
+      </div>
     </div>
   );
 };

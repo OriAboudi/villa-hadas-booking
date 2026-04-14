@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Invitation } from '../types';
+import type { Invitation, BookingData } from '../types';
+import { getAllBookings } from '../lib/firebase';
 
 interface InvitationCalendarProps {
   invitations: Invitation[];
@@ -15,6 +16,20 @@ export const InvitationCalendar = ({
   onEventClick,
 }: InvitationCalendarProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [bookings, setBookings] = useState<BookingData[]>([]);
+
+  // Load bookings to show on calendar
+  useEffect(() => {
+    const loadBookings = async () => {
+      try {
+        const data = await getAllBookings();
+        setBookings(data);
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+      }
+    };
+    loadBookings();
+  }, []);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -28,8 +43,15 @@ export const InvitationCalendar = ({
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   };
 
-  const getEventsForDate = (dateStr: string): Invitation[] => {
-    return invitations.filter(inv => inv.eventDate === dateStr);
+  const getEventsForDate = (dateStr: string) => {
+    const invitationEvents = invitations.filter(inv => inv.eventDate === dateStr);
+    const bookingEvents = bookings.filter(booking => {
+      const checkInDate = new Date(booking.checkIn).toISOString().split('T')[0];
+      const checkOutDate = new Date(booking.checkOut).toISOString().split('T')[0];
+      const currentDate = dateStr;
+      return currentDate >= checkInDate && currentDate < checkOutDate;
+    });
+    return { invitations: invitationEvents, bookings: bookingEvents };
   };
 
   const handlePrevMonth = () => {
@@ -73,37 +95,37 @@ export const InvitationCalendar = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 space-y-4"
+      className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-4 space-y-3"
     >
       {/* Header with Month/Year and Navigation */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <button
           onClick={handlePrevMonth}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
         >
-          <ChevronRight className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+          <ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </button>
 
         <div className="text-center">
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">
             {monthNames[month]} {year}
           </h3>
         </div>
 
         <button
           onClick={handleNextMonth}
-          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
         >
-          <ChevronLeft className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+          <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </button>
       </div>
 
       {/* Day Names Header */}
-      <div className="grid grid-cols-7 gap-2 mb-2">
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {dayNames.map(day => (
           <div
             key={day}
-            className="text-center text-sm font-semibold text-slate-600 dark:text-slate-400 py-2"
+            className="text-center text-xs font-semibold text-slate-600 dark:text-slate-400 py-1"
           >
             {day.substring(0, 1)}
           </div>
@@ -111,9 +133,9 @@ export const InvitationCalendar = ({
       </div>
 
       {/* Calendar Grid */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 gap-2">
+          <div key={weekIndex} className="grid grid-cols-7 gap-1">
             {week.map((day, dayIndex) => {
               const dateStr = day
                 ? formatDateKey(year, month, day)
@@ -129,7 +151,7 @@ export const InvitationCalendar = ({
                 <motion.div
                   key={dayIndex}
                   whileHover={day ? { scale: 1.05 } : {}}
-                  className={`min-h-24 p-2 rounded-lg transition-all ${
+                  className={`aspect-square p-1 rounded-lg transition-all text-center flex flex-col items-center justify-center ${
                     !day
                       ? 'bg-transparent'
                       : isToday
@@ -145,9 +167,9 @@ export const InvitationCalendar = ({
                   }}
                 >
                   {day && (
-                    <div className="space-y-1">
+                    <div className="w-full space-y-0.5">
                       <div
-                        className={`text-sm font-bold ${
+                        className={`text-xs font-bold ${
                           isToday
                             ? 'text-blue-600 dark:text-blue-400'
                             : 'text-slate-900 dark:text-white'
@@ -156,27 +178,35 @@ export const InvitationCalendar = ({
                         {day}
                       </div>
 
-                      {/* Event Dots */}
-                      {dayEvents.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {dayEvents.slice(0, 3).map((event, idx) => (
+                      {/* Event Dots - Invitations (blue) and Bookings (green) */}
+                      {(dayEvents.invitations.length > 0 || dayEvents.bookings.length > 0) && (
+                        <div className="flex justify-center gap-0.5 flex-wrap">
+                          {/* Invitation dots */}
+                          {dayEvents.invitations.slice(0, 1).map((event, idx) => (
                             <motion.button
-                              key={idx}
-                              whileHover={{ scale: 1.2 }}
+                              key={`inv-${idx}`}
+                              whileHover={{ scale: 1.3 }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (onEventClick) {
                                   onEventClick(event);
                                 }
                               }}
-                              className="w-2 h-2 rounded-full transition-all hover:w-3 hover:h-3"
-                              style={{ backgroundColor: event.color }}
-                              title={event.guestName}
+                              className="w-1.5 h-1.5 rounded-full transition-all bg-blue-500"
+                              title={`אירוע: ${event.guestName}`}
                             />
                           ))}
-                          {dayEvents.length > 3 && (
-                            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">
-                              +{dayEvents.length - 3}
+                          {/* Booking dots */}
+                          {dayEvents.bookings.slice(0, 1).map((booking, idx) => (
+                            <span
+                              key={`book-${idx}`}
+                              className="w-1.5 h-1.5 rounded-full bg-green-500"
+                              title={`הזמנה: ${booking.fullName}`}
+                            />
+                          ))}
+                          {dayEvents.invitations.length + dayEvents.bookings.length > 2 && (
+                            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold leading-none">
+                              +
                             </span>
                           )}
                         </div>
@@ -191,18 +221,22 @@ export const InvitationCalendar = ({
       </div>
 
       {/* Legend */}
-      <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
-        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+      <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
+        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
           🔑 מקרא:
         </p>
-        <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+        <div className="flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-400">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
             <span>היום</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-slate-400"></div>
-            <span>עם אירועים</span>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+            <span>אירועים</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+            <span>הזמנות</span>
           </div>
         </div>
       </div>

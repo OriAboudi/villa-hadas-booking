@@ -79,6 +79,7 @@ export const DealCard = ({ deal, index, icon: Icon }: DealCardProps) => {
         <div className="p-4 sm:p-6 pt-0">
           <Link
             to="/contract"
+            state={{ deal }}
             className={`w-full block text-center px-4 sm:px-6 py-3 sm:py-4
                       bg-gradient-to-r ${deal.gradient}
                       text-white font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl

@@ -93,5 +93,7 @@ export interface PageSettings {
   // General
   siteTitle: string;
   siteLogo: string;
+  // Pricing
+  pricePerNight: number;
   updatedAt: string;
 }

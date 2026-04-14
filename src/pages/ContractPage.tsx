@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, AlertCircle, Send, Loader2, User, Calendar, CreditCard, FileText } from 'lucide-react';
+import { Check, AlertCircle, Send, Loader2, User, Calendar, CreditCard, FileText, Gift } from 'lucide-react';
 import { calculateNights, formatCurrency } from '../lib/utils';
-import type { BookingData } from '../types';
+import type { BookingData, Deal } from '../types';
 import { sendBookingEmails } from '../lib/emailService';
-import { saveBooking } from '../lib/firebase';
+import { saveBooking, getPageSettings, getActiveDeals } from '../lib/firebase';
 
 interface InputFieldProps {
   label: string;
@@ -90,9 +91,20 @@ const InputField: React.FC<InputFieldProps> = ({
 
 // ⭐ עכשיו הקומפוננט הראשי
 export const ContractPage = () => {
+  const location = useLocation();
+  const dealFromState = location.state?.deal as Deal | undefined;
+
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pricePerNight, setPricePerNight] = useState<number>(1500);
+  const [availableDeals, setAvailableDeals] = useState<Deal[]>([]);
+  const [selectedDealId, setSelectedDealId] = useState<string | null>(dealFromState?.id || null);
 
   const [formData, setFormData] = useState<Partial<BookingData>>({
     fullName: '',
@@ -107,9 +119,53 @@ export const ContractPage = () => {
     status: 'pending',
   });
 
+  // Load available deals and set price
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load available deals
+        const deals = await getActiveDeals();
+        setAvailableDeals(deals);
+
+        // If coming from a deal, use deal price FIRST
+        if (dealFromState && dealFromState.salePrice > 0) {
+          console.log('✅ Using deal price:', dealFromState.salePrice);
+          setPricePerNight(dealFromState.salePrice);
+        } else {
+          // Otherwise load from settings
+          const settings = await getPageSettings();
+          console.log('✅ Using settings price:', settings.pricePerNight);
+          setPricePerNight(settings.pricePerNight);
+        }
+      } catch (error) {
+        console.error('Error loading price settings:', error);
+        setPricePerNight(1500); // Fallback
+      }
+    };
+    loadData();
+  }, [dealFromState]);
+
+  // Handle deal selection
+  const handleDealChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const dealId = e.target.value;
+    setSelectedDealId(dealId || null);
+
+    if (dealId) {
+      const selectedDeal = availableDeals.find(d => d.id === dealId);
+      if (selectedDeal) {
+        setPricePerNight(selectedDeal.salePrice);
+        console.log('✅ Selected deal price:', selectedDeal.salePrice);
+      }
+    } else {
+      // Reset to settings price
+      getPageSettings().then(settings => {
+        setPricePerNight(settings.pricePerNight);
+      });
+    }
+  };
+
   // חישוב מחירים
   const nights = calculateNights(formData.checkIn || '', formData.checkOut || '');
-  const pricePerNight = 1500;
   const totalPrice = nights * pricePerNight;
   const balance = totalPrice - (formData.deposit || 0);
 
@@ -241,6 +297,46 @@ export const ContractPage = () => {
             מלאו את הפרטים ונשלח אליכם אישור בדוא"ל
           </p>
         </motion.div>
+
+        {/* Deal Info - if from deal */}
+        {dealFromState && (
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className={`mb-8 p-6 rounded-2xl border-2 bg-gradient-to-r ${dealFromState.gradient} bg-opacity-10
+                       border-transparent shadow-lg`}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  {dealFromState.title}
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300 mb-3">
+                  {dealFromState.description}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {dealFromState.features.slice(0, 3).map((feature) => (
+                    <span key={feature} className="px-3 py-1 bg-white dark:bg-slate-700 rounded-full text-sm">
+                      ✓ {feature}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-slate-600 dark:text-slate-400 line-through">
+                  ₪{dealFromState.originalPrice}
+                </div>
+                <div className="text-3xl font-black text-slate-900 dark:text-white">
+                  ₪{dealFromState.salePrice}
+                </div>
+                <div className="text-sm font-bold text-green-600 dark:text-green-400">
+                  -{dealFromState.discount}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Form */}
         <motion.form
@@ -382,6 +478,39 @@ export const ContractPage = () => {
             </div>
           </section>
 
+          {/* Deal Selector */}
+          {availableDeals.length > 0 && (
+            <section>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500
+                              flex items-center justify-center shadow-lg">
+                  <Gift className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">בחר מבצע (אופציונלי)</h2>
+              </div>
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20
+                            rounded-2xl p-6 border-2 border-amber-200 dark:border-amber-800">
+                <select
+                  value={selectedDealId || ''}
+                  onChange={handleDealChange}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-amber-300 dark:border-amber-700
+                           bg-white dark:bg-slate-800 text-slate-900 dark:text-white
+                           focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                >
+                  <option value="">-- ללא מבצע (מחיר רגיל) --</option>
+                  {availableDeals.map((deal) => (
+                    <option key={deal.id} value={deal.id}>
+                      {deal.title} - ₪{deal.salePrice} (חיסכון {deal.discount})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-3 text-sm text-amber-700 dark:text-amber-300">
+                  💡 בחר מבצע כדי לקבל מחיר מיוחד. המחיר יתעדכן אוטומטית.
+                </p>
+              </div>
+            </section>
+          )}
+
           {/* Payment Summary */}
           <section>
             <div className="flex items-center gap-3 mb-6">
@@ -391,11 +520,11 @@ export const ContractPage = () => {
               </div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">סיכום תשלום</h2>
             </div>
-            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800
                           rounded-2xl p-6 space-y-4">
               <div className="flex justify-between items-center text-lg">
                 <span className="text-slate-600 dark:text-slate-400">מחיר ללילה:</span>
-                <span className="font-bold text-slate-900 dark:text-white">₪1,500</span>
+                <span className="font-bold text-slate-900 dark:text-white">₪{pricePerNight.toLocaleString('he-IL')}</span>
               </div>
               <div className="flex justify-between items-center text-lg">
                 <span className="text-slate-600 dark:text-slate-400">מספר לילות:</span>

@@ -54,6 +54,21 @@ export const saveBooking = async (bookingData: Omit<BookingData, 'id'>) => {
   }
 };
 
+// עדכון הזמנה
+export const updateBooking = async (id: string, updates: Partial<BookingData>) => {
+  try {
+    const docRef = doc(db, 'bookings', id);
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: Timestamp.now(),
+    });
+    console.log('✅ Booking updated:', id);
+  } catch (error) {
+    console.error('❌ Error updating booking:', error);
+    throw error;
+  }
+};
+
 // קבלת כל ההזמנות
 export const getAllBookings = async (): Promise<BookingData[]> => {
   try {
@@ -322,37 +337,43 @@ export const uploadImage = async (
   }
 };
 
-// קבלת תמונות לפי קטגוריה
+// קבלת תמונות לפי קטגוריה - SIMPLIFIED (no composite index needed)
 export const getImagesByCategory = async (category: string): Promise<ImageAsset[]> => {
   try {
+    // Simplified query - only filter by category, avoid composite index requirement
     const q = query(
       collection(db, 'images'),
-      where('category', '==', category),
-      where('isActive', '==', true),
-      orderBy('displayOrder', 'asc')
+      where('category', '==', category)
     );
     const querySnapshot = await getDocs(q);
     const images: ImageAsset[] = [];
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      images.push({
-        id: doc.id,
-        fileName: data.fileName,
-        storageUrl: data.storageUrl,
-        category: data.category,
-        displayOrder: data.displayOrder,
-        altText: data.altText,
-        uploadedAt: data.uploadedAt?.toDate().toISOString() || new Date().toISOString(),
-        isActive: data.isActive,
-      });
+      // Filter by isActive in code instead of Firebase query
+      if (data.isActive !== false) {
+        images.push({
+          id: doc.id,
+          fileName: data.fileName,
+          storageUrl: data.storageUrl,
+          category: data.category,
+          displayOrder: data.displayOrder,
+          altText: data.altText,
+          uploadedAt: data.uploadedAt?.toDate().toISOString() || new Date().toISOString(),
+          isActive: data.isActive,
+        });
+      }
     });
+
+    // Sort by displayOrder in code
+    images.sort((a, b) => a.displayOrder - b.displayOrder);
 
     console.log('✅ Loaded', images.length, `images for category: ${category}`);
     return images;
   } catch (error) {
     console.error('❌ Error loading images:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent app crash
+    return [];
   }
 };
 
@@ -448,6 +469,7 @@ export const getPageSettings = async (): Promise<PageSettings> => {
           featuresTitle: data.featuresTitle || 'המשכנעות שלנו',
           siteTitle: data.siteTitle || 'Villa Hadas',
           siteLogo: data.siteLogo || '',
+          pricePerNight: data.pricePerNight || 1500,
           updatedAt: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
         };
       }
@@ -466,6 +488,7 @@ export const getPageSettings = async (): Promise<PageSettings> => {
         featuresTitle: 'המשכנעות שלנו',
         siteTitle: 'Villa Hadas',
         siteLogo: '',
+        pricePerNight: 1500,
         updatedAt: new Date().toISOString(),
       };
     }
